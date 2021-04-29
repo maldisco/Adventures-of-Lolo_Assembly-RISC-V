@@ -1,6 +1,6 @@
 .data
-.include "./imagens/doisbe.data"		# inclui o .data com a imagem
-.include "./imagens/adois.data"
+.include "./imagens/map.data"		# inclui o .data com a imagem
+.include "./imagens/mapa.data"
 
 .text
 	li s0,0xFF200604	# seleciona frame 0
@@ -8,12 +8,12 @@
 	
 	li s0,0xFF000000	# Frame0
 	li s1,0xFF100000	# Frame1
-	la t0,doisbe		# endereço da imagem
+	la t0,map		# endereço da imagem
 	lw t1,0(t0)		# número de linhas
 	lw t2,4(t0)		# número de colunas
 	li t3,0			# contador
 	
-	la t6,adois		# endereço da segunda imagem (a2)
+	la t6,mapa		# endereço da segunda imagem (a2)
 	addi t6,t6,8		# vai para o .data da a2
 	
 	mul t4,t1,t2		# numero total de pixels
@@ -40,7 +40,7 @@ FORA:	li s0,0xFF200604	# Escolhe o Frame 0 ou 1
 
 LOOP3: 	  sw t2,0(s0)		# seleciona a Frame t2
 	  xori t2,t2,0x001	# escolhe a outra frame
-	  li a0,50		# pausa de 50m segundos
+	  li a0,500		# pausa de 50m segundos
 	  li a7,32
 	  ecall	
 	  j LOOP3
