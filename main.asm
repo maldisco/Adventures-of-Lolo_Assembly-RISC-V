@@ -1,5 +1,5 @@
 # ===========================================
-# 1. [] Imprimir os elementos estáticos
+# 1. [X] Imprimir os elementos estáticos
 # 2. [] Movimentar o lolo com WASD
 # 3. [] Travar a movimentação dentro do mapa
 # 4. [] Colisões com objetos estáticos
@@ -10,19 +10,18 @@
 # 9. [] Implementar vitória/derrota
 # ===========================================
 
-
 .data
 .include "./sprites/lolo/lolo_front_1.data"
 .include "./sprites/bg/map.data"
-.include "./sprites/rock.data"
 .include "./macros.asm"
-
 .text
 main:	
 	la s0,map
 	jal IMPRIME
-	la s1, rock		#endereço do arquivo lolo
-	imprime_imagem(100,100)
+	jal FUNDO
+	jal ESTATICOS_LEVEL_1
 	exit()
 	
 .include "./procedimentos.asm"
+.include "./levels/level_1/level_1_estatico.asm"
+.include "./levels/interface.asm"
