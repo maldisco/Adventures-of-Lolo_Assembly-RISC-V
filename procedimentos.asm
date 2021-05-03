@@ -6,7 +6,7 @@
 .text
 # Carrega a imagem
 IMPRIME:
-	li t0,0xFF000000	# Frame 0
+#	li t0,0xFF000000	# Frame 0
 	lw t4,0(s0)		# numero de colunas
 	lw t5,4(s0)		# numero de linhas
 	addi s0,s0,8		# primeiro pixels depois das informações de nlin ncol
@@ -20,8 +20,5 @@ I_LOOP1:
 	addi s0,s0,4
 	addi t2,t2,1		# incrementa contador de bits
 	j I_LOOP1		# volta a verificar
-
-
-# devolve o controle ao sistema operacional
 I_FIM:	
 	ret
