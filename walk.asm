@@ -29,76 +29,75 @@ LOLO_WALK:
 	j POLL_LOOP
 	
 LOLO_WALK_UP:
-
-	ERASE(LOLO_POSX,LOLO_POSY,CURRENT_FRAME)# Apaga o lolo do frame atual
-	
+	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME)
+						# Apaga o lolo do frame atual
 	LOADW(t1,CURRENT_FRAME)
 	xori t1,t1,0x001
-	SAVEW(t1,CURRENT_FRAME)			# Carrega na memória o próximo frame
-	
+	SAVEW(t1,CURRENT_FRAME)			# Salva na memória o próximo frame
 	LOADW(t1,LOLO_POSY)
 	addi t1,t1,-16
-	SAVEW(t1,LOLO_POSY)			# Carrega a próxima posição Y de LOLO
-	
+	li t2, MAP_UPPER_EDGE
+	blt t1,t2,LWU_INVALID
+	SAVEW(t1,LOLO_POSY)			# Salva a próxima posição Y de LOLO
+LWU_INVALID:
 	PRINT_DYN_IMG(lolo_up_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME)
-						# Imprime o lolo no próximo frase, na posição atualizada
+						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW(t1,CURRENT_FRAME)			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
-
 LOLO_WALK_DOWN:
-
-	ERASE(LOLO_POSX,LOLO_POSY,CURRENT_FRAME)# Apaga o lolo do frame atual
-	
+	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME)
+						# Apaga o lolo do frame atual
 	LOADW(t1,CURRENT_FRAME)
 	xori t1,t1,0x001
-	SAVEW(t1,CURRENT_FRAME)			# Carrega na memória o próximo frame
-	
+	SAVEW(t1,CURRENT_FRAME)			# Salva na memória o próximo frame
 	LOADW(t1,LOLO_POSY)
 	addi t1,t1,16
-	SAVEW(t1,LOLO_POSY)			# Carrega a próxima posição Y de LOLO
-	
+	li t2, MAP_LOWER_EDGE
+	bgt t1,t2,LWD_INVALID
+	SAVEW(t1,LOLO_POSY)			# Salva a próxima posição Y de LOLO
+LWD_INVALID:
 	PRINT_DYN_IMG(lolo_down_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME)
-						# Imprime o lolo no próximo frase, na posição atualizada
+						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW(t1,CURRENT_FRAME)			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
-
 LOLO_WALK_RIGHT:
-
-	ERASE(LOLO_POSX,LOLO_POSY,CURRENT_FRAME)# Apaga o lolo do frame atual
-	
+	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME)
+						# Apaga o lolo do frame atual, printando um tijolo em seu lugar	
 	LOADW(t1,CURRENT_FRAME)
 	xori t1,t1,0x001
-	SAVEW(t1,CURRENT_FRAME)			# Carrega na memória o próximo frame
-	
+	SAVEW(t1,CURRENT_FRAME)			# Salva na memória o próximo frame	
 	LOADW(t1,LOLO_POSX)
 	addi t1,t1,16
-	SAVEW(t1,LOLO_POSX)			# Carrega a próxima posição Y de LOLO
-	
+	# test if inside map
+	li t2, MAP_RIGHT_EDGE
+	bgt t1,t2,LWR_INVALID
+	SAVEW(t1,LOLO_POSX)			# Salva a próxima posição Y de LOLO	
+LWR_INVALID:
 	PRINT_DYN_IMG(lolo_right_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME)
-						# Imprime o lolo no próximo frase, na posição atualizada
+						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW(t1,CURRENT_FRAME)			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
-	
 LOLO_WALK_LEFT:
-
-	ERASE(LOLO_POSX,LOLO_POSY,CURRENT_FRAME)# Apaga o lolo do frame atual
-	
+	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME)
+						# Apaga o lolo do frame atual
 	LOADW(t1,CURRENT_FRAME)
 	xori t1,t1,0x001
-	SAVEW(t1,CURRENT_FRAME)			# Carrega na memória o próximo frame
-	
+	SAVEW(t1,CURRENT_FRAME)			# Salva na memória o próximo frame
 	LOADW(t1,LOLO_POSX)
 	addi t1,t1,-16
-	SAVEW(t1,LOLO_POSX)			# Carrega a próxima posição Y de LOLO
-	
+	#test if inside map
+	li t2, MAP_LEFT_EDGE
+	blt t1,t2, LWL_INVALID
+	SAVEW(t1,LOLO_POSX)			# Salva a próxima posição Y de LOLO
+LWL_INVALID:
 	PRINT_DYN_IMG(lolo_left_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME)
-						# Imprime o lolo no próximo frase, na posição atualizada
+						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW(t1,CURRENT_FRAME)			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
