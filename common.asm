@@ -8,6 +8,7 @@
 .eqv MAP_UPPER_EDGE	36
 .eqv MAP_RIGHT_EDGE	249
 .eqv MAP_LOWER_EDGE	211
+.eqv WALKABLE_BLOCKS_PATH   0x10010114
 
 .eqv MMIO_set			0xff200000
 .eqv MMIO_add			0xff200004
@@ -15,9 +16,13 @@
 CURRENT_FRAME:		.word 0
 LOLO_POSX:		.word 74
 LOLO_POSY:		.word 36
+WALKABLE_BLOCKS:	.space 121
 
 # Include
 .include "./sprites/blocos/tijolo.data"
+.include "./sprites/blocos/rock.data"
+.include "./sprites/blocos/arvore.data"
+.include "./sprites/blocos/arbusto.data"
 .include "./sprites/bg/map.data"
 
 ########################################################
@@ -75,6 +80,15 @@ FORA:
 #	    NAS COORDENADAS (X,Y) PASSADAS	       #
 ########################################################
 .macro PRINT_STC_IMG(%n, %sprite, %x, %y, %frame)
+	li t1, %x
+	li t2, %y
+	CALCULATE_BLOCK(t1,t2)		# Bloco (x,y) = T1
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	li t3,1
+	li t4,0
+	li t5,%n
+	jal PSI_LOOP_0
 	# escolhe a frame aonde a sprite será desenhada
 	li a1,FRAME_0		# endereco inicial da Memoria VGA - Frame 0
 	LOADW(t0,%frame)
@@ -98,43 +112,24 @@ PULA_1:
 	li a6,%n		# guarda o numero de blocos a serem desenhados
 	
 	addi s1,s1,8		# chega ao .text
+	li t1,0			# contador
+	li t2, 0xffffff80
+	li t4,0			# segundo contador
+	la a7,%sprite
 	# ==========================================================
-	# a1 = endereço inicial 
-	# a2 = endereço final
+	# a1 = endereço inicial (atualizado a cada bloco)
+	# a2 = endereço final (atualizado a cada bloco)
 	# a3 = numero de pixels a serem pintados por linha
+	# a4 = endereço inicial bloco 1
+	# a5 = endereço final bloco 1
+	# a6 = numero de blocos a serem pintados
+	# a7 = endereço da sprite a ser pintada
 	# t1 = contador de pixels pintados
 	# t2 = cor a ser substituida pelo transparente
 	# t3 = variável auxiliar de leitura e impressão de byte
 	# t4 = contador de blocos pintados
 	# ==========================================================
-	li t1,0			# contador
-	li t2, 0xffffff80
-	li t4,0			# segundo contador
-LOOP: 	bge a1,a2,FIM		# Se for o último endereço então sai do loop	
-	bne t1,a3, CONTINUA
-	sub a1,a1,a3
-	addi a1,a1,320		
-	li t1,0			# pinta 16 pixels depois desce pra próxima linha
-CONTINUA:
-	lb t3, 0(s1)		# carrega o byte
-	beq t3, t2, PULA	# testa se o byte é da cor t6
-	sb t3, 0(a1)		# pinta o byte
-PULA:	addi t1,t1,1
-	addi a1,a1,1 
-	addi s1,s1,1
-	j LOOP			# volta a verificar
-FIM:
-	addi t4,t4,1
-	beq t4,a6,FORA
-	addi a1,a4,16		# endereço inicial do próx bloco = endereço inicial do bloco atual + 16
-	addi a2,a5,16		# endereço final do próx bloco = endereço final do bloco atual + 16
-	addi a4,a4,16		# atualiza endereço inicial atual
-	addi a5,a5,16		# atualiza endereço final atual
-	li t1,0
-	la s1,%sprite
-	addi s1,s1,8
-	j LOOP
-FORA:
+	jal PSI_LOOP
 .end_macro
 ########################################################
 #            IMPRIME UM SPRITE 16X16 NAS	       #	 	
@@ -219,6 +214,35 @@ VAI:
 	DRAW_BG(CURRENT_FRAME)
 	li t1,0
 	SAVEW(t1,CURRENT_FRAME)
+	#reset walkable blocks
+	la t1,WALKABLE_BLOCKS
+	li t2,121
+	li t3,0
+LOOP:	bge t3,t2,FORA
+	li t4,0
+	sb t4,(t1)
+	addi t1,t1,1
+	addi t3,t3,1
+	j LOOP
+FORA:
+.end_macro
+########################################################
+#   		    IMPRIME LEVEL 1		       #
+########################################################
+.macro level_1()
+	PRINT_STC_IMG(4,rock,90,116,CURRENT_FRAME)
+	PRINT_STC_IMG(4,arbusto,90,132,CURRENT_FRAME)
+	la t1,CURRENT_FRAME
+	lw t2, (t1)
+	xori t2,t2,0x001
+	sw t2, (t1)
+	PRINT_STC_IMG(4,rock,90,116,CURRENT_FRAME)
+	PRINT_STC_IMG(4,arbusto,90,132,CURRENT_FRAME)
+	la t1,CURRENT_FRAME
+	lw t2, (t1)
+	xori t2,t2,0x001
+	sw t2, (t1)
+	
 .end_macro
 ########################################################
 #   		    SOUNDTRACK			       #
@@ -226,14 +250,15 @@ VAI:
 .macro ost()
 .data
 # lista de nota,duração,nota,duração,nota,duração,...
-GOLDEN_WIND_NUM: .word 80
-GOLDEN_WIND_NOTES: 67,666,64,888,64,111,65,111,66,333,65,333,64,222,62,333,64,333,65,222,67,666,72,666,60,222,62,222,64,333,65,333,64,222,62,333,71,333,69,222,67,666,64,888,64,111,65,111,66,333,65,333,64,222,62,333,64,333,65,222,67,666,72,666,72,222,74,222,76,333,69,333,67,222,66,333,76,333,77,222,79,666,76,888,76,111,77,111,78,333,77,333,76,222,74,333,76,333,77,222,79,666,84,666,72,222,74,222,76,333,77,333,76,222,74,333,83,333,81,222,79,666,76,888,76,111,77,111,78,333,77,333,76,222,74,333,76,333,77,222,79,666,84,666,84,222,86,222,88,333,81,333,79,222,78,333,88,333,85,222
+GOLDEN_WIND_NUM: .word 71
+GOLDEN_WIND_NOTES: 59,405,60,202,60,202,59,202,60,405,67,405,67,1418,59,405,60,202,60,202,59,202,60,405,67,405,67,405,69,202,67,811,60,202,62,202,64,405,65,202,64,405,65,405,64,608,62,405,60,405,62,1622,60,202,59,1418,59,405,60,202,60,202,59,202,60,405,67,405,67,1418,59,405,60,202,60,202,59,202,60,405,67,405,67,405,69,202,67,811,60,202,62,202,64,405,65,202,64,405,65,405,64,608,62,405,60,405,62,2838,64,202,62,202,60,202,59,202,60,405,60,202,60,405,60,607,59,405,60,405,64,405,67,1622,60,202,60,4257,59,608,60,202,60,3244
+
 .text
 	la s0,GOLDEN_WIND_NUM		# define o endereço do número de notas
 	lw s1,0(s0)		# le o numero de notas
 	la s0,GOLDEN_WIND_NOTES		# define o endereço das notas
 	li t0,0			# zera o contador de notas
-	li a2,2			# define o instrumento
+	li a2,7			# define o instrumento
 	li a3,30		# define o volume
 
 LOOP:	beq t0,s1, FIM		# contador chegou no final? então  vá para FIM
@@ -258,6 +283,23 @@ FIM:
 	li %reg,0
 	la %reg,%label
 	lw %reg,(%reg)
+.end_macro
+########################################################
+#             CALCULA O BLOCO UTILIZANDO 	       #
+#		AS COORDENADAS (X,Y)	       	       #
+########################################################
+.macro CALCULATE_BLOCK(%regx,%regy)
+	mv t1,%regx
+	mv t3,%regy
+	addi t1,t1,-74
+	li t2,16
+	div t1,t1,t2		# X grid = T1
+	addi t3,t3,-36
+	li t2,16
+	div t3,t3,t2		# Y grid = T3
+	li t2,11
+	mul t3,t3,t2		
+	add t1,t1,t3		# Bloco (x,y) = T1
 .end_macro
 ########################################################
 #               SALVA O VALOR PASSADO		       #
