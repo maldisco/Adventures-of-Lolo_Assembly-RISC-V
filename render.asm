@@ -89,3 +89,43 @@ PSI_FIM:
 	j PSI_LOOP
 PSI_FORA:
 	ret
+#################################
+#     LOOPS PRINT STC IMG	#		 
+#################################
+PSI_LOOP_2: 	
+	bge a1,a2,PSI_FORA_2		# Se for o último endereço então sai do loop
+	bne t1,a3, PSI_CONTINUA_2
+	sub a1,a1,a3
+	addi a1,a1,320		
+	li t1,0			# pinta 16 pixels depois desce pra próxima linha
+PSI_CONTINUA_2:
+	lb t3, 0(s1)		# carrega o byte
+	beq t3, t2, PSI_PULA_2	# testa se o byte é da cor t6
+	sb t3, 0(a1)		# pinta o byte
+PSI_PULA_2:	
+	addi t1,t1,1
+	addi a1,a1,1 
+	addi s1,s1,1
+	j PSI_LOOP_2			# volta a verificar
+PSI_FORA_2:
+	ret
+#################################
+#     LOOPS PRINT DYN IMG	#		 
+#################################
+# RENDERING
+PDI_LOOP: 	
+	bge a1,a2,PDI_FORA		# Se for o último endereço então sai do loop
+	bne t1,a3, PDI_CONTINUA
+	sub a1,a1,a3
+	addi a1,a1,320		
+	li t1,0			# pinta 16 pixels depois desce pra próxima linha
+PDI_CONTINUA:
+	lb t3, 0(s1)		# carrega o byte
+	beq t3, t2, PDI_PULA	# testa se o byte é da cor t6, se for não o desenha
+	sb t3, 0(a1)		# pinta o byte
+PDI_PULA:	addi t1,t1,1
+	addi a1,a1,1 
+	addi s1,s1,1
+	j PDI_LOOP			# volta a verificar
+PDI_FORA:
+	ret

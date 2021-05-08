@@ -50,11 +50,7 @@ WALKABLE_BLOCKS:	.space 121
 ########################################################
 .macro PRINT_STC_IMG(%sprite, %x, %y)
 	# escolhe a frame aonde a sprite será desenhada
-	li a1,FRAME_0		# endereco inicial da Memoria VGA - Frame 0
-	LOADW( t0,CURRENT_FRAME )
-	beqz t0, PULA_1
-	li a1,FRAME_1
-PULA_1:	
+	jal FRAME_TEST
 	la s1, %sprite
 	li a3,16		# todos os sprites são quadrados 16x16
 	
@@ -79,20 +75,7 @@ PULA_1:
 	# ==========================================================
 	li t1,0			# contador
 	li t2, 0xffffff80
-LOOP: 	bge a1,a2,FORA		# Se for o último endereço então sai do loop
-	bne t1,a3, CONTINUA
-	sub a1,a1,a3
-	addi a1,a1,320		
-	li t1,0			# pinta 16 pixels depois desce pra próxima linha
-CONTINUA:
-	lb t3, 0(s1)		# carrega o byte
-	beq t3, t2, PULA	# testa se o byte é da cor t6
-	sb t3, 0(a1)		# pinta o byte
-PULA:	addi t1,t1,1
-	addi a1,a1,1 
-	addi s1,s1,1
-	j LOOP			# volta a verificar
-FORA:
+	jal PSI_LOOP_2
 .end_macro
 ########################################################
 #            IMPRIME N SPRITES 16X16 NAS	       #	 	
@@ -109,13 +92,9 @@ FORA:
 #            IMPRIME UM SPRITE 16X16 NAS	       #	 	
 #	    NAS COORDENADAS (X,Y) PASSADAS	       #
 ########################################################
-.macro PRINT_DYN_IMG(%sprite, %buffer_x, %buffer_y, %frame)
+.macro PRINT_DYN_IMG(%sprite, %buffer_x, %buffer_y)
 	# escolhe a frame aonde a sprite será desenhada
-	li a1,FRAME_0		# endereco inicial da Memoria VGA - Frame 0
-	LOADW( t0,%frame )
-	beqz t0, PULA_1
-	li a1,FRAME_1
-PULA_1:	
+	jal FRAME_TEST
 	la s1, %sprite
 	li a3,16		# todos os sprites são quadrados 16x16
 	LOADW( t1,%buffer_y )
@@ -138,30 +117,15 @@ PULA_1:
 	# ==========================================================
 	li t1,0			# contador
 	li t2, 0xffffff80
-LOOP: 	bge a1,a2,FORA		# Se for o último endereço então sai do loop
-	bne t1,a3, CONTINUA
-	sub a1,a1,a3
-	addi a1,a1,320		
-	li t1,0			# pinta 16 pixels depois desce pra próxima linha
-CONTINUA:
-	lb t3, 0(s1)		# carrega o byte
-	beq t3, t2, PULA	# testa se o byte é da cor t6, se for não o desenha
-	sb t3, 0(a1)		# pinta o byte
-PULA:	addi t1,t1,1
-	addi a1,a1,1 
-	addi s1,s1,1
-	j LOOP			# volta a verificar
-FORA:
+	jal PDI_LOOP
 .end_macro
 ########################################################
 #               DESENHA O BACKGROUND		       #	
 ########################################################
-.macro DRAW_BG(%frame)	
-	li t0, 0xff000000
-	LOADW( t1,%frame )	# carrega da memoria o frame passado
-	beqz t1,VAI		# se for igual a zero, imprime na frame 0
-	li t0, 0xff100000	# se não, imprime na frame 1
-VAI:
+.macro DRAW_BG()	
+	# carrega da memoria o frame passado
+	jal FRAME_TEST
+	mv t0,a1
 	la s0,map
 	jal IMPRIME
 	PRINT_STC_IMG( 11,tijolo,74,36 )
@@ -183,17 +147,17 @@ VAI:
 	li t3, 0xff200604
 	li t0, 0
 	sw t0,(t3)
-	DRAW_BG( CURRENT_FRAME )
+	DRAW_BG()
 	li t1,1
 	SAVEW( t1,CURRENT_FRAME )
-	DRAW_BG( CURRENT_FRAME )
+	DRAW_BG()
 	li t1,0
 	SAVEW( t1,CURRENT_FRAME )
 	#reset walkable blocks
 	reset_walkable_blocks()
 .end_macro
 ########################################################
-#   		    FRAME SETUP			       #
+#   		    BLOCK RESET 		       #
 ########################################################
 .macro reset_walkable_blocks()
 	jal RESET_WALKABLE_BLOCKS

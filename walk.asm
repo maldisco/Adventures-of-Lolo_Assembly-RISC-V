@@ -29,7 +29,7 @@ LOLO_WALK:
 	j POLL_LOOP
 	
 LOLO_WALK_UP:
-	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME )
+	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
 	LOADW( t1,CURRENT_FRAME )
 	xori t1,t1,0x001
@@ -43,7 +43,7 @@ LOLO_WALK_UP:
 	LOADW( t3,LOLO_POSX )
 	bne t3,t1,LWU_CONTINUE
 	SAVEW( a1,LOLO_POSY )
-	PRINT_DYN_IMG( lolo_coca, LOLO_POSX, LOLO_POSY, CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_coca, LOLO_POSX, LOLO_POSY)
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
@@ -64,14 +64,14 @@ LWU_CONTINUE:
 	# WALKABLE BLOCK TEST END
 	SAVEW( a1,LOLO_POSY )			# Salva a próxima posição Y de LOLO
 LWU_INVALID:
-	PRINT_DYN_IMG( lolo_up_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_up_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
 LOLO_WALK_DOWN:
-	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME )
+	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
 	LOADW( t1,CURRENT_FRAME )
 	xori t1,t1,0x001
@@ -92,14 +92,14 @@ LOLO_WALK_DOWN:
 	# WALKABLE BLOCK TEST END
 	SAVEW( a1,LOLO_POSY )			# Salva a próxima posição Y de LOLO
 LWD_INVALID:
-	PRINT_DYN_IMG( lolo_down_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_down_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
 LOLO_WALK_RIGHT:
-	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME )
+	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual, printando um tijolo em seu lugar	
 	LOADW( t1,CURRENT_FRAME )
 	xori t1,t1,0x001
@@ -120,14 +120,14 @@ LOLO_WALK_RIGHT:
 	# WALKABLE BLOCK TEST END
 	SAVEW( a1,LOLO_POSX )			# Salva a próxima posição Y de LOLO	
 LWR_INVALID:
-	PRINT_DYN_IMG( lolo_right_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_right_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
 	j POLL_LOOP
 LOLO_WALK_LEFT:
-	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY,CURRENT_FRAME )
+	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
 	LOADW( t1,CURRENT_FRAME )
 	xori t1,t1,0x001
@@ -148,7 +148,7 @@ LOLO_WALK_LEFT:
 	# WALKABLE BLOCK TEST END
 	SAVEW( a1,LOLO_POSX )			# Salva a próxima posição Y de LOLO
 LWL_INVALID:
-	PRINT_DYN_IMG( lolo_left_1, LOLO_POSX, LOLO_POSY, CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_left_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			

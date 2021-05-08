@@ -10,7 +10,7 @@
 ### 5.1.2 [] Password							###
 ### 5.2 [] Tela de encerramento						###
 ### 5.2.1 [] Passou de fase						###
-### 5.2.2 [] Zerou							###
+### 5.2.2 [X] Zerou							###
 ### 5.2.3 [] Perdeu							###
 ### 6. [] Imprimir os elementos dinâmicos				###
 ### 7. [] Colisões com objetos dinâmicos				###
@@ -26,7 +26,7 @@ main:
 GAME:
 	setup()
 	first_level()
-	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY,CURRENT_FRAME )
+	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
 	li s0, MMIO_set
 POLL_LOOP:				# LOOP de leitura e captura de tecla
 #	li s0, MMIO_set
@@ -160,6 +160,16 @@ RWB_LOOP:
 	addi t3,t3,1
 	j RWB_LOOP
 RWB_FORA:
+	ret
+#################################
+#     	   FRAME TEST		#
+#################################
+FRAME_TEST:
+	li a1,FRAME_0		
+	LOADW( t0,CURRENT_FRAME )
+	beqz t0, FT_PULA
+	li a1,FRAME_1
+FT_PULA:	
 	ret
 #################################
 #    	   GAME ITSELF	        #
