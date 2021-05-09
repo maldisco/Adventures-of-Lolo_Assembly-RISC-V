@@ -23,19 +23,6 @@
 .text
 main:	
 	start_menu()
-GAME:
-	setup()
-	first_level()
-	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
-	li s0, MMIO_set
-POLL_LOOP:				# LOOP de leitura e captura de tecla
-#	li s0, MMIO_set
-	lb t1,(s0)
-	beqz t1,POLL_LOOP		# Enquanto não houver nenhuma tecla apertada, retorna ao loop
-	li s11,MMIO_add
-	lw s11, (s11)			# Tecla capturada em S11
-	jal LOLO_WALK
-	j POLL_LOOP
 #################################
 #	 PRINT BACKGROUND	#
 #################################
@@ -59,10 +46,10 @@ I_FIM:
 #    	   START MENU		#
 #################################
 START_MENU:
-	li t0, 0xff000000
+	li t0, FRAME_0
 	la s0, start_menu_1
 	jal IMPRIME
-	li t0, 0xff100000
+	li t0, FRAME_1
 	la s0, start_menu_2
 	jal IMPRIME
 	li s0, MMIO_set
@@ -147,6 +134,8 @@ PASSWORD:
 	exit()
 #################################
 #    RESET WALKABLE BLOCKS	#
+#################################
+# Set all blocks as walkable	#
 #################################	
 RESET_WALKABLE_BLOCKS:
 	la t1,WALKABLE_BLOCKS
@@ -164,6 +153,9 @@ RWB_FORA:
 #################################
 #     	   FRAME TEST		#
 #################################
+# Returns a1 as current frame	#
+# address			#
+#################################
 FRAME_TEST:
 	li a1,FRAME_0		
 	LOADW( t0,CURRENT_FRAME )
@@ -172,9 +164,54 @@ FRAME_TEST:
 FT_PULA:	
 	ret
 #################################
+#    	OPEN OR CLOSE DOOR	#
+#################################
+DOOR_TEST:
+	beqz t0, DT_OPEN
+	la s1, porta_fechada
+	ret
+DT_OPEN:
+	la s1, porta
+	ret
+#################################
+#    	OPEN OR CLOSE DOOR	#
+#################################
+KEY_TEST:
+	beqz t1, KT_OPEN_DOOR
+	ret
+KT_OPEN_DOOR:
+	SAVEW(t1,DOOR_STATE)
+	ret
+#################################
 #    	   GAME ITSELF	        #
 #################################
-#GAME:
-	
+GAME:	
+	LOADW(t0,CURRENT_LEVEL)
+	li t1,1
+	beq t0,t1,FIRST_LEVEL
+	li t1,2
+	beq t0,t1,SECOND_LEVEL
+	ending()
+FIRST_LEVEL:
+	level_title(fase_1)
+	setup()
+	first_level()
+	j GAMEPLAY
+SECOND_LEVEL:
+	level_title(fase_2)
+	setup()
+	second_level()
+	j GAMEPLAY
+GAMEPLAY:
+	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
+	li s0, MMIO_set
+POLL_LOOP:				# LOOP de leitura e captura de tecla
+#	li s0, MMIO_set
+	lb t1,(s0)
+	beqz t1,POLL_LOOP		# Enquanto não houver nenhuma tecla apertada, retorna ao loop
+	li s11,MMIO_add
+	lw s11, (s11)			# Tecla capturada em S11
+	jal LOLO_WALK
+	j POLL_LOOP	
 .include "walk.asm"
 .include "render.asm"

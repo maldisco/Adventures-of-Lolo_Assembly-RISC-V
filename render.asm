@@ -1,5 +1,5 @@
 #################################
-#      LOOP PRINT N SPRITES	#
+#     LOOP PRINT N SPRITES	#
 #################################
 # a0 =  Numero de blocos	#
 # a1 =  Endereço da sprite	#
@@ -123,7 +123,8 @@ PDI_CONTINUA:
 	lb t3, 0(s1)		# carrega o byte
 	beq t3, t2, PDI_PULA	# testa se o byte é da cor t6, se for não o desenha
 	sb t3, 0(a1)		# pinta o byte
-PDI_PULA:	addi t1,t1,1
+PDI_PULA:	
+	addi t1,t1,1
 	addi a1,a1,1 
 	addi s1,s1,1
 	j PDI_LOOP			# volta a verificar

@@ -42,12 +42,16 @@ LOLO_WALK_UP:
 	bne t2,a1,LWU_CONTINUE
 	LOADW( t3,LOLO_POSX )
 	bne t3,t1,LWU_CONTINUE
+	# IS DOOR OPEN TEST START
+	LOADW(t1,DOOR_STATE)
+	bnez t1, LWU_INVALID
+	# IS DOOR OPEN TEST END
 	SAVEW( a1,LOLO_POSY )
-	PRINT_DYN_IMG( lolo_coca, LOLO_POSX, LOLO_POSY)
+	PRINT_DYN_IMG(lolo_coca, LOLO_POSX, LOLO_POSY)
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	LOADW(t1,CURRENT_FRAME)			
 	sw t1,(t3)				# Troca o frame mostrado no bitmap
-	ending()
+	finished_level()
 	# IS DOOR TEST END
 LWU_CONTINUE:
 	# IS IN MAP TEST START
@@ -57,14 +61,34 @@ LWU_CONTINUE:
 	# WALKABLE BLOCK TEST START
 	LOADW( t3,LOLO_POSX )
 	CALCULATE_BLOCK(t3,a1)
+	# IS KEY BLOCK TEST START
+	la t2, KEY_BLOCKS
+	add t2,t2,t1
+	lb t3,(t2)
+	beqz t3, LWU_NOT_KEY
+	li t3,0
+	sb t3,(t2)
+	LOADW(t2,KEY_COUNTER)
+	addi t2,t2,-1	
+	SAVEW(t2,KEY_COUNTER)
+	door_refresh()
+	LOADW(a1,LOLO_POSY)
+	addi a1,a1,-16
+	SAVEW(a1,LOLO_POSY)
+	# APAGA O KEY BLOCK
+	ERASE_BLOCK()
+	j LWU_IS_KEY	
+	# IS KEY BLOCK TEST END
+LWU_NOT_KEY:
 	la t2, WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	bgt t1,zero, LWU_INVALID
 	# WALKABLE BLOCK TEST END
-	SAVEW( a1,LOLO_POSY )			# Salva a próxima posição Y de LOLO
+	SAVEW(a1,LOLO_POSY)			# Salva a próxima posição Y de LOLO
+LWU_IS_KEY:
 LWU_INVALID:
-	PRINT_DYN_IMG( lolo_up_1, LOLO_POSX, LOLO_POSY)
+	PRINT_DYN_IMG(lolo_up_1,LOLO_POSX,LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
 	li t3, FRAME_SELECT
 	LOADW( t1,CURRENT_FRAME )			
@@ -85,12 +109,32 @@ LOLO_WALK_DOWN:
 	# WALKABLE BLOCK TEST START
 	LOADW( t3,LOLO_POSX )
 	CALCULATE_BLOCK( t3,a1 )
+	# IS KEY BLOCK TEST START
+	la t2, KEY_BLOCKS
+	add t2,t2,t1
+	lb t3,(t2)
+	beqz t3, LWD_NOT_KEY
+	li t3,0
+	sb t3,(t2)
+	LOADW(t2,KEY_COUNTER)
+	addi t2,t2,-1
+	SAVEW(t2,KEY_COUNTER)
+	door_refresh()
+	LOADW(a1,LOLO_POSY)
+	addi a1,a1,16
+	SAVEW(a1,LOLO_POSY)
+	# APAGA O KEY BLOCK
+	ERASE_BLOCK
+	j LWD_IS_KEY	
+	# IS KEY BLOCK TEST END
+LWD_NOT_KEY:
 	la t2, WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	bgt t1,zero, LWD_INVALID
 	# WALKABLE BLOCK TEST END
-	SAVEW( a1,LOLO_POSY )			# Salva a próxima posição Y de LOLO
+	SAVEW(a1,LOLO_POSY)			# Salva a próxima posição Y de LOLO
+LWD_IS_KEY:
 LWD_INVALID:
 	PRINT_DYN_IMG( lolo_down_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
@@ -113,12 +157,32 @@ LOLO_WALK_RIGHT:
 	# WALKABLE BLOCK TEST START
 	LOADW( t3,LOLO_POSY )
 	CALCULATE_BLOCK( a1,t3 )
+	# IS KEY BLOCK TEST START
+	la t2, KEY_BLOCKS
+	add t2,t2,t1
+	lb t3,(t2)
+	beqz t3, LWR_NOT_KEY
+	li t3,0
+	sb t3,(t2)
+	LOADW(t2,KEY_COUNTER)
+	addi t2,t2,-1
+	SAVEW(t2,KEY_COUNTER)
+	door_refresh()
+	LOADW(a1,LOLO_POSX)
+	addi a1,a1,16
+	SAVEW(a1,LOLO_POSX)
+	# APAGA O KEY BLOCK
+	ERASE_BLOCK()
+	j LWR_IS_KEY	
+	# IS KEY BLOCK TEST END
+LWR_NOT_KEY:
 	la t2, WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	bgt t1,zero, LWR_INVALID
 	# WALKABLE BLOCK TEST END
 	SAVEW( a1,LOLO_POSX )			# Salva a próxima posição Y de LOLO	
+LWR_IS_KEY:
 LWR_INVALID:
 	PRINT_DYN_IMG( lolo_right_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
@@ -141,12 +205,32 @@ LOLO_WALK_LEFT:
 	# WALKABLE BLOCK TEST START
 	LOADW( t3,LOLO_POSY )
 	CALCULATE_BLOCK(a1,t3)
+	# IS KEY BLOCK TEST START
+	la t2, KEY_BLOCKS
+	add t2,t2,t1
+	lb t3,(t2)
+	beqz t3, LWL_NOT_KEY
+	li t3,0
+	sb t3,(t2)
+	LOADW(t2,KEY_COUNTER)
+	addi t2,t2,-1
+	SAVEW(t2,KEY_COUNTER)
+	door_refresh()
+	LOADW(a1,LOLO_POSX)
+	addi a1,a1,-16
+	SAVEW(a1,LOLO_POSX)
+	# APAGA O KEY BLOCK
+	ERASE_BLOCK()
+	j LWL_IS_KEY	
+	# IS KEY BLOCK TEST END
+LWL_NOT_KEY:
 	la t2, WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	bgt t1,zero, LWL_INVALID
 	# WALKABLE BLOCK TEST END
-	SAVEW( a1,LOLO_POSX )			# Salva a próxima posição Y de LOLO
+	SAVEW(a1,LOLO_POSX)			# Salva a próxima posição Y de LOLO
+LWL_IS_KEY:
 LWL_INVALID:
 	PRINT_DYN_IMG( lolo_left_1, LOLO_POSX, LOLO_POSY)
 						# Imprime o lolo no próximo frame, na posição atualizada
