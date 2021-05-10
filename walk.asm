@@ -1,20 +1,3 @@
-.data
-#LOLO_POSX:		.word 72
-#LOLO_POSY:		.word 36
-#CURRENT_FRAME:		.word 0
-#.eqv UP			0x77
-#.eqv DOWN		0x73
-#.eqv LEFT		0x61
-#.eqv RIGHT		0x64
-#.eqv FRAME_SELECT	0xff200604
-
-#.include "./common.asm"
-.include "./sprites/lolo_up/lolo_up_1.data"
-.include "./sprites/lolo_down/lolo_down_1.data"
-.include "./sprites/lolo_right/lolo_right_1.data"
-.include "./sprites/lolo_left/lolo_left_1.data"
-
-.text
 LOLO_WALK:
 	li t1, UP 				# t1 = 'W'
 	li t2, DOWN				# t2 = 'S'
@@ -31,9 +14,7 @@ LOLO_WALK:
 LOLO_WALK_UP:
 	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
-	LOADW( t1,CURRENT_FRAME )
-	xori t1,t1,0x001
-	SAVEW( t1,CURRENT_FRAME )			# Salva na memória o próximo frame
+	SWITCH_FRAME()			# Salva na memória o próximo frame
 	LOADW(a1,LOLO_POSY)
 	addi a1,a1,-16
 	# IS DOOR TEST START
@@ -75,8 +56,7 @@ LWU_CONTINUE:
 	LOADW(a1,LOLO_POSY)
 	addi a1,a1,-16
 	SAVEW(a1,LOLO_POSY)
-	# APAGA O KEY BLOCK
-	ERASE_BLOCK()
+	ERASE_BLOCK()		# APAGA O KEY BLOCK
 	j LWU_IS_KEY	
 	# IS KEY BLOCK TEST END
 LWU_NOT_KEY:
@@ -97,9 +77,7 @@ LWU_INVALID:
 LOLO_WALK_DOWN:
 	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
-	LOADW( t1,CURRENT_FRAME )
-	xori t1,t1,0x001
-	SAVEW( t1,CURRENT_FRAME )			# Salva na memória o próximo frame
+	SWITCH_FRAME()			# Salva na memória o próximo frame
 	LOADW(a1,LOLO_POSY)
 	addi a1,a1,16
 	# IS IN MAP TEST START
@@ -123,8 +101,7 @@ LOLO_WALK_DOWN:
 	LOADW(a1,LOLO_POSY)
 	addi a1,a1,16
 	SAVEW(a1,LOLO_POSY)
-	# APAGA O KEY BLOCK
-	ERASE_BLOCK
+	ERASE_BLOCK		# APAGA O KEY BLOCK
 	j LWD_IS_KEY	
 	# IS KEY BLOCK TEST END
 LWD_NOT_KEY:
@@ -145,9 +122,7 @@ LWD_INVALID:
 LOLO_WALK_RIGHT:
 	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual, printando um tijolo em seu lugar	
-	LOADW( t1,CURRENT_FRAME )
-	xori t1,t1,0x001
-	SAVEW( t1,CURRENT_FRAME )			# Salva na memória o próximo frame		
+	SWITCH_FRAME()			# Salva na memória o próximo frame		
 	LOADW( a1,LOLO_POSX )
 	addi a1,a1,16
 	# IS IN MAP TEST START
@@ -171,8 +146,7 @@ LOLO_WALK_RIGHT:
 	LOADW(a1,LOLO_POSX)
 	addi a1,a1,16
 	SAVEW(a1,LOLO_POSX)
-	# APAGA O KEY BLOCK
-	ERASE_BLOCK()
+	ERASE_BLOCK()		# APAGA O KEY BLOCK
 	j LWR_IS_KEY	
 	# IS KEY BLOCK TEST END
 LWR_NOT_KEY:
@@ -193,9 +167,7 @@ LWR_INVALID:
 LOLO_WALK_LEFT:
 	PRINT_DYN_IMG( tijolo,LOLO_POSX,LOLO_POSY)
 						# Apaga o lolo do frame atual
-	LOADW( t1,CURRENT_FRAME )
-	xori t1,t1,0x001
-	SAVEW( t1,CURRENT_FRAME )			# Salva na memória o próximo frame
+	SWITCH_FRAME()			# Salva na memória o próximo frame
 	LOADW( a1,LOLO_POSX )
 	addi a1,a1,-16
 	# IS IN MAP TEST START
@@ -219,8 +191,7 @@ LOLO_WALK_LEFT:
 	LOADW(a1,LOLO_POSX)
 	addi a1,a1,-16
 	SAVEW(a1,LOLO_POSX)
-	# APAGA O KEY BLOCK
-	ERASE_BLOCK()
+	ERASE_BLOCK()		# APAGA O KEY BLOCK
 	j LWL_IS_KEY	
 	# IS KEY BLOCK TEST END
 LWL_NOT_KEY:

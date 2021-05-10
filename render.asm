@@ -38,11 +38,12 @@ PSI_PULA_1:
 	add a1,a1,t2		# endereço inicial = linha x 320 + coluna
 	mv a2,a1		
 	li t1,4816		# 15x320 +16	
-	add a2,a2,t1		# endereço final = endereço inicial + 15x320 + 16 	
-	mv a7, s1
+	add a2,a2,t1		# endereço final = endereço inicial + 15x320 + 16 
+		
+	mv a7, s1		# cópia do endereço da sprite
 	li a3,16		# todos os sprites são quadrados 16x16
-	mv a4,a1		# guarda os endereços inicial e final
-	mv a5,a2		# serao usados posteriormente
+	mv a4,a1		# cópia endereço inicial
+	mv a5,a2		# cópia endereço final
 	mv a6,a0		# guarda o numero de blocos a serem desenhados
 	addi s1,s1,8		# chega ao .text
 	li t1,0			# contador
@@ -90,43 +91,41 @@ PSI_FIM:
 PSI_FORA:
 	ret
 #################################
-#     LOOPS PRINT STC IMG	#		 
+#      LOOP PRINT 1 SPRITE	#		 
 #################################
-PSI_LOOP_2: 	
-	bge a1,a2,PSI_FORA_2		# Se for o último endereço então sai do loop
-	bne t1,a3, PSI_CONTINUA_2
+PS_LOOP: 	
+	bge a1,a2,PS_FORA		# Se for o último endereço então sai do loop
+	bne t1,a3, PS_CONTINUA
 	sub a1,a1,a3
 	addi a1,a1,320		
 	li t1,0			# pinta 16 pixels depois desce pra próxima linha
-PSI_CONTINUA_2:
+PS_CONTINUA:
 	lb t3, 0(s1)		# carrega o byte
-	beq t3, t2, PSI_PULA_2	# testa se o byte é da cor t6
+	beq t3, t2, PS_PULA	# testa se o byte é da cor t6
 	sb t3, 0(a1)		# pinta o byte
-PSI_PULA_2:	
+PS_PULA:	
 	addi t1,t1,1
 	addi a1,a1,1 
 	addi s1,s1,1
-	j PSI_LOOP_2			# volta a verificar
-PSI_FORA_2:
+	j PS_LOOP			# volta a verificar
+PS_FORA:
 	ret
 #################################
-#     LOOPS PRINT DYN IMG	#		 
+#     	RENDER BACKGROUND	#
 #################################
-# RENDERING
-PDI_LOOP: 	
-	bge a1,a2,PDI_FORA		# Se for o último endereço então sai do loop
-	bne t1,a3, PDI_CONTINUA
-	sub a1,a1,a3
-	addi a1,a1,320		
-	li t1,0			# pinta 16 pixels depois desce pra próxima linha
-PDI_CONTINUA:
-	lb t3, 0(s1)		# carrega o byte
-	beq t3, t2, PDI_PULA	# testa se o byte é da cor t6, se for não o desenha
-	sb t3, 0(a1)		# pinta o byte
-PDI_PULA:	
-	addi t1,t1,1
-	addi a1,a1,1 
-	addi s1,s1,1
-	j PDI_LOOP			# volta a verificar
-PDI_FORA:
+IMPRIME:
+	lw t4,0(s0)		# numero de colunas
+	lw t5,4(s0)		# numero de linhas
+	addi s0,s0,8		# primeiro pixels depois das informações de nlin ncol
+	mul t1,t4,t5            # numero total de pixels da imagem
+	li t2,0
+I_LOOP1:
+ 	beq t1,t2,I_FIM		# Se for o último endereço então sai do loop
+	lw t3,0(s0)		# le um conjunto de 4 pixels : word
+	sw t3,0(t0)		# escreve a word na memória VGA
+	addi t0,t0,4		# soma 4 ao endereço
+	addi s0,s0,4
+	addi t2,t2,1		# incrementa contador de bits
+	j I_LOOP1		# volta a verificar
+I_FIM:	
 	ret

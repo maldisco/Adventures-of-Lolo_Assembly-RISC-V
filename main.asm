@@ -5,8 +5,8 @@
 ### 3. [X] Travar a movimentação dentro do mapa				###
 ### 4. [X] Colisões com objetos estáticos				###
 ### 5. [] Menu inicial e tela de encerramento				###
-### 5.1 [x] Menu inicial com 2 opções					###
-### 5.1.1 [x] Start							###
+### 5.1 [X] Menu inicial com 2 opções					###
+### 5.1.1 [X] Start							###
 ### 5.1.2 [] Password							###
 ### 5.2 [] Tela de encerramento						###
 ### 5.2.1 [] Passou de fase						###
@@ -23,25 +23,6 @@
 .text
 main:	
 	start_menu()
-#################################
-#	 PRINT BACKGROUND	#
-#################################
-IMPRIME:
-	lw t4,0(s0)		# numero de colunas
-	lw t5,4(s0)		# numero de linhas
-	addi s0,s0,8		# primeiro pixels depois das informações de nlin ncol
-	mul t1,t4,t5            # numero total de pixels da imagem
-	li t2,0
-I_LOOP1:
- 	beq t1,t2,I_FIM		# Se for o último endereço então sai do loop
-	lw t3,0(s0)		# le um conjunto de 4 pixels : word
-	sw t3,0(t0)		# escreve a word na memória VGA
-	addi t0,t0,4		# soma 4 ao endereço
-	addi s0,s0,4
-	addi t2,t2,1		# incrementa contador de bits
-	j I_LOOP1		# volta a verificar
-I_FIM:	
-	ret
 #################################
 #    	   START MENU		#
 #################################
@@ -182,36 +163,8 @@ KEY_TEST:
 KT_OPEN_DOOR:
 	SAVEW(t1,DOOR_STATE)
 	ret
-#################################
-#    	   GAME ITSELF	        #
-#################################
-GAME:	
-	LOADW(t0,CURRENT_LEVEL)
-	li t1,1
-	beq t0,t1,FIRST_LEVEL
-	li t1,2
-	beq t0,t1,SECOND_LEVEL
-	ending()
-FIRST_LEVEL:
-	level_title(fase_1)
-	setup()
-	first_level()
-	j GAMEPLAY
-SECOND_LEVEL:
-	level_title(fase_2)
-	setup()
-	second_level()
-	j GAMEPLAY
-GAMEPLAY:
-	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
-	li s0, MMIO_set
-POLL_LOOP:				# LOOP de leitura e captura de tecla
-#	li s0, MMIO_set
-	lb t1,(s0)
-	beqz t1,POLL_LOOP		# Enquanto não houver nenhuma tecla apertada, retorna ao loop
-	li s11,MMIO_add
-	lw s11, (s11)			# Tecla capturada em S11
-	jal LOLO_WALK
-	j POLL_LOOP	
+
+
+.include "game.asm"
 .include "walk.asm"
 .include "render.asm"

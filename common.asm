@@ -15,7 +15,7 @@
 .eqv DOOR_POSY		20
 
 .eqv WALKABLE_BLOCKS_PATH   	0x10010114
-.eqv KEY_BLOCKS_PATH	0x100102cc
+.eqv KEY_BLOCKS_PATH		0x100102cc
 
 .eqv UP			0x77	# 'W'
 .eqv DOWN		0x73	# 'S'
@@ -37,13 +37,17 @@ CURRENT_FRAME:		.word 0
 LOLO_POSX:		.word 74
 LOLO_POSY:		.word 36
 WALKABLE_BLOCKS:	.space 121		# vetor de 121 elementos, 0 = walkable, 1 = unwalkable
-DOOR_STATE:		.word 1 		# 0 -> open, 1-> closed
+DOOR_STATE:		.word 1 		# 0 -> open, 1 -> closed
 KEY_COUNTER:		.word 0	
-KEY_BLOCKS:		.space 121		# 0 = regular, 1 = special
+KEY_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = regular, 1 = special
 CURRENT_LEVEL:		.word 1
 
 # Include
 .include "./sprites/lolo/lolo_coca.data"
+.include "./sprites/lolo_up/lolo_up_1.data"
+.include "./sprites/lolo_down/lolo_down_1.data"
+.include "./sprites/lolo_right/lolo_right_1.data"
+.include "./sprites/lolo_left/lolo_left_1.data"
 .include "./sprites/blocos/tijolo.data"
 .include "./sprites/blocos/rock.data"
 .include "./sprites/blocos/arvore.data"
@@ -66,20 +70,19 @@ CURRENT_LEVEL:		.word 1
 	# escolhe a frame aonde a sprite será desenhada
 	jal FRAME_TEST
 	la s1, %sprite
-	li a3,16		# todos os sprites são quadrados 16x16
-	
+	li a3,16		# todos os sprites são quadrados 16x16	
 	li t1, %y		# linha 
 	li t2, %x		# coluna
-	
 	li t3, 320
 	mul t3,t1,t3		# aux = linhax320 (linha)
 	add a1,a1,t3
 	add a1,a1,t2		# endereço inicial = linha x 320 + coluna
 	mv a2,a1		
 	li t1,4816		# 15x320 +16	
-	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 
-	
+	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 	
 	addi s1,s1,8		# chega ao .text
+	li t1,0			# contador
+	li t2, 0xffffff80
 	# ==========================================================
 	# a1 = endereço inicial 
 	# a2 = endereço final
@@ -87,9 +90,7 @@ CURRENT_LEVEL:		.word 1
 	# t1 = contador de pixels pintados
 	# t2 = cor a ser substituida pelo transparente
 	# ==========================================================
-	li t1,0			# contador
-	li t2, 0xffffff80
-	jal PSI_LOOP_2
+	jal PS_LOOP
 .end_macro
 ########################################################
 #       PRINTS THE DOOR IN HER USUAL COORDINATES       #
@@ -107,9 +108,10 @@ CURRENT_LEVEL:		.word 1
 	add a1,a1,t2		# endereço inicial = linha x 320 + coluna
 	mv a2,a1		
 	li t1,4816		# 15x320 +16	
-	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 
-	
+	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 	
 	addi s1,s1,8		# chega ao .text
+	li t1,0			# contador
+	li t2, 0xffffff80
 	# ==========================================================
 	# a1 = endereço inicial 
 	# a2 = endereço final
@@ -117,9 +119,7 @@ CURRENT_LEVEL:		.word 1
 	# t1 = contador de pixels pintados
 	# t2 = cor a ser substituida pelo transparente
 	# ==========================================================
-	li t1,0			# contador
-	li t2, 0xffffff80
-	jal PSI_LOOP_2
+	jal PS_LOOP
 .end_macro
 ########################################################
 #           PRINTS 'N' 16x16 SPRITES ON THE	       #	 	
@@ -149,9 +149,10 @@ CURRENT_LEVEL:		.word 1
 	add a1,a1,t2		# endereço inicial = linha x 320 + coluna
 	mv a2,a1		
 	li t1,4816		# 15x320 +16	
-	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 
-	
+	add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 	
 	addi s1,s1,8		# chega ao .text
+	li t1,0			# contador
+	li t2, 0xffffff80
 	# ==========================================================
 	# a1 = endereço inicial 
 	# a2 = endereço final
@@ -159,9 +160,7 @@ CURRENT_LEVEL:		.word 1
 	# t1 = contador de pixels pintados
 	# t2 = cor a ser substituida pelo transparente
 	# ==========================================================
-	li t1,0			# contador
-	li t2, 0xffffff80
-	jal PDI_LOOP
+	jal PS_LOOP
 .end_macro
 ########################################################
 #             PRINTS A 16X16 SPRITE ON THE	       #	 	
@@ -235,9 +234,9 @@ CURRENT_LEVEL:		.word 1
 	j START_MENU
 .end_macro
 ########################################################
-#   		    PRINT LEVEL 1		       #
+#   		    RENDER STAGE 1		       #
 ########################################################
-.macro first_level()
+.macro stage_one()
 	li t1,0
 	SAVEW(t1, DOOR_STATE)
 	PRINT_DOOR()
@@ -268,9 +267,9 @@ CURRENT_LEVEL:		.word 1
 	SWITCH_FRAME()
 .end_macro
 ########################################################
-#   		    PRINT LEVEL 2		       #
+#   		    PRINT STAGE 2		       #
 ########################################################
-.macro second_level()
+.macro stage_two()
 	li t3, 3
 	SAVEW(t3, KEY_COUNTER)
 	PRINT_DOOR()
