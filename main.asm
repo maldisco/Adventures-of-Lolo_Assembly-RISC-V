@@ -164,7 +164,6 @@ KT_OPEN_DOOR:
 	SAVEW(t1,DOOR_STATE)
 	ret
 
-
 .include "game.asm"
 .include "walk.asm"
 .include "render.asm"

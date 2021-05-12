@@ -4,6 +4,8 @@ GAME:
 	beq t0,t1,STAGE_ONE
 	li t1,2
 	beq t0,t1,STAGE_TWO
+	li t1,3
+	beq t0,t1,STAGE_THREE
 	ending()
 STAGE_ONE:
 	level_title(fase_1)
@@ -15,6 +17,10 @@ STAGE_TWO:
 	setup()
 	stage_two()
 	j GAMEPLAY
+STAGE_THREE:
+	level_title(fase_3)
+	setup()
+	stage_three()
 GAMEPLAY:
 	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
 	li s0, MMIO_set
