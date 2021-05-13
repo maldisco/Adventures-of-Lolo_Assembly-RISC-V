@@ -14,9 +14,6 @@
 .eqv DOOR_POSX		186
 .eqv DOOR_POSY		20
 
-.eqv WALKABLE_BLOCKS_PATH   	0x10010114
-.eqv KEY_BLOCKS_PATH		0x100102cc
-
 .eqv UP			0x77	# 'W'
 .eqv DOWN		0x73	# 'S'
 .eqv LEFT		0x61	# 'A'
@@ -53,20 +50,17 @@ CURRENT_LEVEL:		.word 1
 .include "./sprites/lolo_right/lolo_right_1.data"
 .include "./sprites/lolo_left/lolo_left_1.data"
 .include "./sprites/blocos/tijolo.data"
-.include "./sprites/blocos/rock.data"
-.include "./sprites/blocos/arvore.data"
-.include "./sprites/blocos/arbusto.data"
-.include "./sprites/blocos/lake.data"
 .include "./sprites/blocos/bridge.data"
-.include "./sprites/coracao/coracao.data"
 .include "./sprites/porta/porta.data"
 .include "./sprites/porta/porta_fechada.data"
-.include "./sprites/bg/background.data"
 .include "./sprites/bg/start_menu_1.data"
 .include "./sprites/bg/start_menu_2.data"
 .include "./sprites/bg/fase_1.data"
 .include "./sprites/bg/fase_2.data"
 .include "./sprites/bg/fase_3.data"
+.include "./sprites/bg/stage_one.data"
+.include "./sprites/bg/stage_two.data"
+.include "./sprites/bg/stage_three.data"
 .include "./sprites/bg/ending.data"
 .include "./sprites/bg/death.data"
 
@@ -76,7 +70,7 @@ CURRENT_LEVEL:		.word 1
 ########################################################
 .macro PRINT_STC_IMG(%sprite, %x, %y)
 	# escolhe a frame aonde a sprite será desenhada
-	jal FRAME_TEST
+	frame_address(a1)
 	la s1, %sprite
 	li a3,16		# todos os sprites são quadrados 16x16	
 	li t1, %y		# linha 
@@ -104,7 +98,7 @@ CURRENT_LEVEL:		.word 1
 #       PRINTS THE DOOR IN HER USUAL COORDINATES       #
 ########################################################
 .macro PRINT_DOOR()
-	jal FRAME_TEST
+	frame_address(a1)
 	LOADW(t0, DOOR_STATE)
 	jal DOOR_TEST
 	li a3,16		# todos os sprites são quadrados 16x16
@@ -133,12 +127,11 @@ CURRENT_LEVEL:		.word 1
 #           PRINTS 'N' 16x16 SPRITES ON THE	       #	 	
 #	    	(X,Y) COORDINATES PASSED	       #
 ########################################################
-.macro PRINT_STC_IMG(%n, %sprite, %x, %y)
+.macro mark_as_block(%n, %x, %y)
 	li a0, %n
-	la a1, %sprite
 	li a2, %x
 	li a3, %y
-	jal PRINT_STC_IMG
+	jal MARK_AS_BLOCK
 .end_macro
 ########################################################
 #            PRINTS A 16X16 SPRITE ON THE	       #	 	
@@ -146,7 +139,7 @@ CURRENT_LEVEL:		.word 1
 ########################################################
 .macro PRINT_DYN_IMG(%sprite, %current_x, %current_y)
 	# escolhe a frame aonde a sprite será desenhada
-	jal FRAME_TEST
+	frame_address(a1)
 	la s1, %sprite
 	li a3,16		# todos os sprites são quadrados 16x16
 	LOADW( t1,%current_y )
@@ -175,7 +168,7 @@ CURRENT_LEVEL:		.word 1
 #	        (X,Y) COORDINATES PASSED	       #
 #		AND SET IT AS A KEY BLOCK	       #
 ########################################################
-.macro PRINT_KEY_BLOCK(%sprite, %x, %y)
+.macro mark_as_key(%x, %y)
 	li t3, %y
 	li t2, %x
 	CALCULATE_BLOCK(t2,t3)
@@ -184,14 +177,13 @@ CURRENT_LEVEL:		.word 1
 	add t0,t0,t1
 	li t1,1
 	sb t1,(t0)
-	PRINT_STC_IMG(%sprite, %x, %y)
 .end_macro
 ########################################################
 #             PRINTS A 16X16 SPRITE ON THE	       #	 	
 #	        (X,Y) COORDINATES PASSED	       #
 #	       AND SET IT AS A MORTAL BLOCK	       #
 ########################################################
-.macro PRINT_MORTAL_BLOCK(%sprite, %x, %y)
+.macro mark_as_mortal(%x, %y)
 	li t3, %y
 	li t2, %x
 	CALCULATE_BLOCK(t2,t3)
@@ -200,14 +192,13 @@ CURRENT_LEVEL:		.word 1
 	add t0,t0,t1
 	li t1,1
 	sb t1,(t0)
-	PRINT_STC_IMG(%sprite, %x, %y)
 .end_macro
 ########################################################
 #             PRINTS A 16X16 SPRITE ON THE	       #	 	
 #	        (X,Y) COORDINATES PASSED	       #
 #	       AND SET IT AS A MORTAL BLOCK	       #
 ########################################################
-.macro PRINT_BRIDGE_BLOCK(%sprite, %x, %y)
+.macro mark_as_bridge(%x, %y)
 	li t3, %y
 	li t2, %x
 	CALCULATE_BLOCK(t2,t3)
@@ -216,7 +207,6 @@ CURRENT_LEVEL:		.word 1
 	add t0,t0,t1
 	li t1,1
 	sb t1,(t0)
-	PRINT_STC_IMG(%sprite, %x, %y)
 .end_macro
 ########################################################
 #          ERASE A BLOCK IN LOLO'S COORDINATES	       #
@@ -225,30 +215,6 @@ CURRENT_LEVEL:		.word 1
 	SWITCH_FRAME()
 	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
 	SWITCH_FRAME()
-.end_macro
-########################################################
-#               DRAW THE MAP (BACKGROUND)	       #	
-########################################################
-.macro DRAW_BG()	
-	jal FRAME_TEST
-	mv t0,a1	
-	la s0,background
-	jal IMPRIME
-.end_macro
-########################################################
-#   		    FRAME SETUP			       #
-########################################################
-.macro setup()
-	li t3, 0xff200604
-	li t0, 0
-	sw t0,(t3)
-	li t1,1
-	SAVEW(t1,CURRENT_FRAME)
-	DRAW_BG()
-	li t1,0
-	SAVEW(t1,CURRENT_FRAME)
-	DRAW_BG()
-	reset_walkable_blocks()
 .end_macro
 ########################################################
 #   		    BLOCK RESET 		       #
@@ -266,146 +232,112 @@ CURRENT_LEVEL:		.word 1
 #   		    RENDER STAGE 1		       #
 ########################################################
 .macro stage_one()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_one
+	jal IMPRIME
 	li t1,0
 	SAVEW(t1, DOOR_STATE)
 	PRINT_DOOR()
-	PRINT_STC_IMG( 4,rock,122,36 )
-	PRINT_STC_IMG( 2,arbusto,218,36 )
-	PRINT_STC_IMG( 3,rock,138,52 )
-	PRINT_STC_IMG( 1,rock,234,52 )
-	PRINT_STC_IMG( 3,rock,138,68 )
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_STC_IMG( 8,rock,74,148 )
-	PRINT_STC_IMG( 8,rock,74,164 )
-	PRINT_STC_IMG( 8,rock,74,180 )
-	PRINT_STC_IMG( 8,rock,74,196 )
-	PRINT_STC_IMG( 1,arvore,234,196 )
 	SWITCH_FRAME()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_one
+	jal IMPRIME
 	PRINT_DOOR()
-	PRINT_STC_IMG( 4,rock,122,36 )
-	PRINT_STC_IMG( 2,arbusto,218,36 )
-	PRINT_STC_IMG( 3,rock,138,52 )
-	PRINT_STC_IMG( 1,rock,234,52 )
-	PRINT_STC_IMG( 3,rock,138,68 )
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_STC_IMG( 8,rock,74,148 )
-	PRINT_STC_IMG( 8,rock,74,164 )
-	PRINT_STC_IMG( 8,rock,74,180 )
-	PRINT_STC_IMG( 8,rock,74,196 )
-	PRINT_STC_IMG( 1,arvore,234,196 )
-	SWITCH_FRAME()
+	mark_as_block(4,122,36 )
+	mark_as_block(2,218,36 )
+	mark_as_block(3,138,52 )
+	mark_as_block(1,234,52 )
+	mark_as_block(3,138,68 )
+	mark_as_block(1,170,84 )
+	mark_as_block(8,74,148 )
+	mark_as_block(8,74,164 )
+	mark_as_block(8,74,180 )
+	mark_as_block(8,74,196 )
+	mark_as_block(1,234,196 )	
 .end_macro
 ########################################################
 #   		    PRINT STAGE 2		       #
 ########################################################
 .macro stage_two()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_two
+	jal IMPRIME
+	PRINT_DOOR()
+	SWITCH_FRAME()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_two
+	jal IMPRIME
+	PRINT_DOOR()
 	li t3, 3
 	SAVEW(t3, KEY_COUNTER)
-	PRINT_DOOR()
-	PRINT_STC_IMG( 4,rock,122,36 )
-	PRINT_STC_IMG( 2,arbusto,218,36 )
-	PRINT_STC_IMG( 3,rock,138,52 )
-	PRINT_STC_IMG( 1,rock,234,52 )
-	PRINT_STC_IMG( 3,rock,138,68 )
-	PRINT_KEY_BLOCK( coracao,234,68)
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_KEY_BLOCK( coracao,74,132 )
-	PRINT_STC_IMG( 1,rock,74,148 )
-	PRINT_STC_IMG( 2,rock,74,164 )
-	PRINT_STC_IMG( 3,rock,74,180 )
-	PRINT_STC_IMG( 4,rock,74,196 )
-	PRINT_KEY_BLOCK( coracao,218,196 )
-	PRINT_STC_IMG( 1,arvore,234,196 )
-	SWITCH_FRAME()
-	PRINT_DOOR()
-	PRINT_STC_IMG( 4,rock,122,36 )
-	PRINT_STC_IMG( 2,arbusto,218,36 )
-	PRINT_STC_IMG( 3,rock,138,52 )
-	PRINT_STC_IMG( 1,rock,234,52 )
-	PRINT_STC_IMG( 3,rock,138,68 )
-	PRINT_KEY_BLOCK( coracao,234,68)
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_STC_IMG( 1,rock,170,84 )
-	PRINT_KEY_BLOCK( coracao,74,132 )
-	PRINT_STC_IMG( 1,rock,74,148 )
-	PRINT_STC_IMG( 2,rock,74,164 )
-	PRINT_STC_IMG( 3,rock,74,180 )
-	PRINT_STC_IMG( 4,rock,74,196 )
-	PRINT_KEY_BLOCK( coracao,218,196 )
-	PRINT_STC_IMG( 1,arvore,234,196 )
-	SWITCH_FRAME()
+	mark_as_block(4,122,36)
+	mark_as_block(2,218,36)
+	mark_as_block(3,138,52)
+	mark_as_block(1,234,52)
+	mark_as_block(3,138,68)
+	mark_as_key(234,68)
+	mark_as_block(1,170,84)
+	mark_as_block(1,170,84)
+	mark_as_key(74,132)
+	mark_as_block(1,74,148)
+	mark_as_block(2,74,164)
+	mark_as_block(3,74,180)
+	mark_as_block(4,74,196)
+	mark_as_key(218,196)
+	mark_as_block(1,234,196)
 .end_macro
 ########################################################
 #   		    PRINT STAGE 3		       #
 ########################################################
 .macro stage_three()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_three
+	jal IMPRIME
+	PRINT_DOOR()
+	SWITCH_FRAME()
+	frame_address(a1)
+	mv t0,a1	
+	la s0,stage_three
+	jal IMPRIME
+	PRINT_DOOR()
 	li t3, 2
 	SAVEW(t3, KEY_COUNTER)
-	PRINT_DOOR()
-	PRINT_STC_IMG(1,rock,90,52)
-	PRINT_STC_IMG(1,arbusto,106,52)
-	PRINT_STC_IMG(1,arbusto,90,68)
-	PRINT_STC_IMG(1,rock,218,52)
-	PRINT_STC_IMG(1,arbusto,202,52)
-	PRINT_STC_IMG(1,arbusto,218,68)
-	PRINT_MORTAL_BLOCK(lake,122, 84)
-	PRINT_MORTAL_BLOCK(lake,138, 84)
-	PRINT_MORTAL_BLOCK(lake,154, 84)
-	PRINT_MORTAL_BLOCK(lake,170, 84)
-	PRINT_MORTAL_BLOCK(lake,186, 84)
-	PRINT_MORTAL_BLOCK(lake,186, 100)
-	PRINT_MORTAL_BLOCK(lake,186, 116)
-	PRINT_MORTAL_BLOCK(lake,186, 132)
-	PRINT_MORTAL_BLOCK(lake,186, 148)
-	PRINT_MORTAL_BLOCK(lake,122, 148)
-	PRINT_MORTAL_BLOCK(lake,138, 148)
-	PRINT_BRIDGE_BLOCK(bridge,154, 148)	
-	PRINT_MORTAL_BLOCK(lake,170, 148)
-	PRINT_MORTAL_BLOCK(lake,122, 100)
-	PRINT_MORTAL_BLOCK(lake,122, 116)
-	PRINT_MORTAL_BLOCK(lake,122, 132)
-	PRINT_KEY_BLOCK(coracao,154, 116)
-	PRINT_STC_IMG(1,rock,90,180)
-	PRINT_STC_IMG(1,arbusto,106,180)
-	PRINT_STC_IMG(1,arbusto,90,164)
-	PRINT_STC_IMG(1,rock,218,180)
-	PRINT_STC_IMG(1,arbusto,202,180)
-	PRINT_KEY_BLOCK(coracao,234, 196)
-	PRINT_STC_IMG(1,arbusto,218,164)
-	SWITCH_FRAME()
-	PRINT_DOOR()
-	PRINT_STC_IMG(1,rock,90,52)
-	PRINT_STC_IMG(1,arbusto,106,52)
-	PRINT_STC_IMG(1,arbusto,90,68)
-	PRINT_STC_IMG(1,rock,218,52)
-	PRINT_STC_IMG(1,arbusto,202,52)
-	PRINT_STC_IMG(1,arbusto,218,68)
-	PRINT_MORTAL_BLOCK(lake,122, 84)
-	PRINT_MORTAL_BLOCK(lake,138, 84)
-	PRINT_MORTAL_BLOCK(lake,154, 84)
-	PRINT_MORTAL_BLOCK(lake,170, 84)
-	PRINT_MORTAL_BLOCK(lake,186, 84)
-	PRINT_MORTAL_BLOCK(lake,186, 100)
-	PRINT_MORTAL_BLOCK(lake,186, 116)
-	PRINT_MORTAL_BLOCK(lake,186, 132)
-	PRINT_MORTAL_BLOCK(lake,186, 148)
-	PRINT_MORTAL_BLOCK(lake,122, 148)
-	PRINT_MORTAL_BLOCK(lake,138, 148)
-	PRINT_BRIDGE_BLOCK(bridge,154, 148)	
-	PRINT_MORTAL_BLOCK(lake,170, 148)
-	PRINT_MORTAL_BLOCK(lake,122, 100)
-	PRINT_MORTAL_BLOCK(lake,122, 116)
-	PRINT_MORTAL_BLOCK(lake,122, 132)
-	PRINT_KEY_BLOCK(coracao,154, 116)
-	PRINT_STC_IMG(1,rock,90,180)
-	PRINT_STC_IMG(1,arbusto,106,180)
-	PRINT_STC_IMG(1,arbusto,90,164)
-	PRINT_STC_IMG(1,rock,218,180)
-	PRINT_STC_IMG(1,arbusto,202,180)
-	PRINT_KEY_BLOCK(coracao,234, 196)
-	PRINT_STC_IMG(1,arbusto,218,164)
-	SWITCH_FRAME()
+	mark_as_block(1,90,52)
+	mark_as_block(1,106,52)
+	mark_as_block(1,90,68)
+	mark_as_block(1,218,52)
+	mark_as_block(1,202,52)
+	mark_as_block(1,218,68)
+	mark_as_mortal(122, 84)
+	mark_as_mortal(138, 84)
+	mark_as_mortal(154, 84)
+	mark_as_mortal(170, 84)
+	mark_as_mortal(186, 84)
+	mark_as_mortal(186, 100)
+	mark_as_mortal(186, 116)
+	mark_as_mortal(186, 132)
+	mark_as_mortal(186, 148)
+	mark_as_mortal(122, 148)
+	mark_as_mortal(138, 148)
+	mark_as_bridge(154, 148)	
+	mark_as_mortal(170, 148)
+	mark_as_mortal(122, 100)
+	mark_as_mortal(122, 116)
+	mark_as_mortal(122, 132)
+	mark_as_key(154, 116)
+	mark_as_block(1,90,180)
+	mark_as_block(1,106,180)
+	mark_as_block(1,90,164)
+	mark_as_block(1,218,180)
+	mark_as_block(1,202,180)
+	mark_as_key(234, 196)
+	mark_as_block(1,218,164)
+	
 .end_macro
 ########################################################
 #   		    SOUNDTRACK			       #
@@ -526,6 +458,7 @@ CURRENT_LEVEL:		.word 1
 #         THINGS TO RESET AFTER EVERY LEVEL	       #	
 ########################################################
 .macro reset()
+	reset_walkable_blocks()
 	li t1,1
 	SAVEW(t1,DOOR_STATE)
 	li t1,74

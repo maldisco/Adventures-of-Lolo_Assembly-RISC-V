@@ -125,3 +125,23 @@ I_LOOP1:
 	j I_LOOP1		# volta a verificar
 I_FIM:	
 	ret
+
+MARK_AS_BLOCK:
+	mv t1, a2
+	mv t2, a3
+	mv s1, a1
+	CALCULATE_BLOCK(t1,t2)		# Bloco (x,y) = T1
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	li t3,1
+	li t4,0
+	mv t5,a0
+# LOOP SET UNWALKABLE BLOCKS
+MAB_LOOP:	
+	bge t4,t5,MAB_LOOP_FORA	
+	sb t3,(t2)		
+	addi t4,t4,1
+	addi t2,t2,1
+	j MAB_LOOP
+MAB_LOOP_FORA:
+	ret	

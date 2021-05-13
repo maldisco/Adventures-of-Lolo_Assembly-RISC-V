@@ -132,19 +132,6 @@ RWB_LOOP:
 RWB_FORA:
 	ret
 #################################
-#     	   FRAME TEST		#
-#################################
-# Returns a1 as current frame	#
-# address			#
-#################################
-FRAME_TEST:
-	li a1,FRAME_0		
-	LOADW( t0,CURRENT_FRAME )
-	beqz t0, FT_PULA
-	li a1,FRAME_1
-FT_PULA:	
-	ret
-#################################
 #    	OPEN OR CLOSE DOOR	#
 #################################
 DOOR_TEST:

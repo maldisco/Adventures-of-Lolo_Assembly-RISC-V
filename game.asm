@@ -9,20 +9,17 @@ GAME:
 	ending()
 STAGE_ONE:
 	level_title(fase_1)
-	setup()
 	stage_one()
 	j GAMEPLAY
 STAGE_TWO:
 	level_title(fase_2)
-	setup()
 	stage_two()
 	j GAMEPLAY
 STAGE_THREE:
 	level_title(fase_3)
-	setup()
 	stage_three()
 GAMEPLAY:
-	PRINT_DYN_IMG( lolo_coca,LOLO_POSX,LOLO_POSY)
+	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
 	li s0, MMIO_set
 POLL_LOOP:				# LOOP de leitura e captura de tecla
 #	li s0, MMIO_set
