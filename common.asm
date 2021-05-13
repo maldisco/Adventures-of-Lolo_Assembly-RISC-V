@@ -61,7 +61,7 @@ CURRENT_LEVEL:		.word 1
 .include "./sprites/coracao/coracao.data"
 .include "./sprites/porta/porta.data"
 .include "./sprites/porta/porta_fechada.data"
-.include "./sprites/bg/map.data"
+.include "./sprites/bg/background.data"
 .include "./sprites/bg/start_menu_1.data"
 .include "./sprites/bg/start_menu_2.data"
 .include "./sprites/bg/fase_1.data"
@@ -232,19 +232,8 @@ CURRENT_LEVEL:		.word 1
 .macro DRAW_BG()	
 	jal FRAME_TEST
 	mv t0,a1	
-	la s0,map
+	la s0,background
 	jal IMPRIME
-	PRINT_STC_IMG( 11,tijolo,74,36 )
-	PRINT_STC_IMG( 11,tijolo,74,52 )
-	PRINT_STC_IMG( 11,tijolo,74,68 )
-	PRINT_STC_IMG( 11,tijolo,74,84 )
-	PRINT_STC_IMG( 11,tijolo,74,100 )
-	PRINT_STC_IMG( 11,tijolo,74,116 ) 
-	PRINT_STC_IMG( 11,tijolo,74,132 )
-	PRINT_STC_IMG( 11,tijolo,74,148 )
-	PRINT_STC_IMG( 11,tijolo,74,164 )
-	PRINT_STC_IMG( 11,tijolo,74,180 )
-	PRINT_STC_IMG( 11,tijolo,74,196 )
 .end_macro
 ########################################################
 #   		    FRAME SETUP			       #
@@ -254,10 +243,10 @@ CURRENT_LEVEL:		.word 1
 	li t0, 0
 	sw t0,(t3)
 	li t1,1
-	SAVEW( t1,CURRENT_FRAME )
+	SAVEW(t1,CURRENT_FRAME)
 	DRAW_BG()
 	li t1,0
-	SAVEW( t1,CURRENT_FRAME )
+	SAVEW(t1,CURRENT_FRAME)
 	DRAW_BG()
 	reset_walkable_blocks()
 .end_macro
@@ -328,10 +317,7 @@ CURRENT_LEVEL:		.word 1
 	PRINT_STC_IMG( 4,rock,74,196 )
 	PRINT_KEY_BLOCK( coracao,218,196 )
 	PRINT_STC_IMG( 1,arvore,234,196 )
-	la t1,CURRENT_FRAME
-	lw t2, (t1)
-	xori t2,t2,0x001
-	sw t2, (t1)
+	SWITCH_FRAME()
 	PRINT_DOOR()
 	PRINT_STC_IMG( 4,rock,122,36 )
 	PRINT_STC_IMG( 2,arbusto,218,36 )
@@ -348,10 +334,7 @@ CURRENT_LEVEL:		.word 1
 	PRINT_STC_IMG( 4,rock,74,196 )
 	PRINT_KEY_BLOCK( coracao,218,196 )
 	PRINT_STC_IMG( 1,arvore,234,196 )
-	la t1,CURRENT_FRAME
-	lw t2, (t1)
-	xori t2,t2,0x001
-	sw t2, (t1)
+	SWITCH_FRAME()
 .end_macro
 ########################################################
 #   		    PRINT STAGE 3		       #
@@ -443,10 +426,8 @@ CURRENT_LEVEL:		.word 1
 	sleep(2000)
 	LOADW(t3,CURRENT_FRAME)
 	jal BLACK_SCREEN
-	li t0, 0xff0
-	LOADW(t3,CURRENT_FRAME)
-	add t0, t0, t3
-	slli t0,t0,20
+	frame_address(t1)
+	mv t0,t1
 	la s0, ending
 	jal IMPRIME
 	ost()
@@ -459,10 +440,8 @@ CURRENT_LEVEL:		.word 1
 	sleep(2000)
 	LOADW(t3,CURRENT_FRAME)
 	jal BLACK_SCREEN
-	li t0, 0xff0
-	LOADW(t3,CURRENT_FRAME)
-	add t0, t0, t3
-	slli t0,t0,20
+	frame_address(t1)
+	mv t0,t1
 	la s0, death
 	jal IMPRIME
 	ost()
@@ -486,10 +465,8 @@ CURRENT_LEVEL:		.word 1
 	LOADW(t3,CURRENT_FRAME)
 	jal BLACK_SCREEN
 	sleep(500)
-	li t0, 0xff0
-	LOADW(t3,CURRENT_FRAME)
-	add t0, t0, t3
-	slli t0,t0,20
+	frame_address(t1)
+	mv t0,t1
 	la s0, %level
 	jal IMPRIME
 	sleep(3500)
@@ -502,6 +479,15 @@ CURRENT_LEVEL:		.word 1
 	li %reg,0
 	la %reg,%label
 	lw %reg,(%reg)
+.end_macro
+########################################################
+#             RETURN FRAME ADDRESS		       #
+########################################################
+.macro frame_address(%reg)
+	LOADW(%reg,CURRENT_FRAME)
+	li t0,0xff0
+	add %reg,t0,%reg
+	slli %reg,%reg,20
 .end_macro
 ########################################################
 #             CALCULATE THE BLOCK USING		       #

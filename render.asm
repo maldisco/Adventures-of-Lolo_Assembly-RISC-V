@@ -25,11 +25,7 @@ PSI_LOOP_0:
 	j PSI_LOOP_0
 PSI_FORA_0:	
 	# escolhe a frame aonde a sprite será desenhada
-	li a1,FRAME_0		# endereco inicial da Memoria VGA - Frame 0
-	LOADW(t0,CURRENT_FRAME)
-	beqz t0, PSI_PULA_1
-	li a1,FRAME_1		# endereco inicial da Memoria VGA - Frame 1
-PSI_PULA_1:	
+	frame_address(a1)	# endereço do frame atual em a1
 	mv t1, a3		# linha 
 	mv t2, a2		# coluna
 	li t3, 320
