@@ -4,19 +4,20 @@
 ### 2.1 [X] tentar implementar movimentação em blocos <- OLHA AQUI 	###
 ### 3. [X] Travar a movimentação dentro do mapa				###
 ### 4. [X] Colisões com objetos estáticos				###
-### 5. [] Menu inicial e tela de encerramento				###
+### 5. [X] Menu inicial e tela de encerramento				###
 ### 5.1 [X] Menu inicial com 2 opções					###
 ### 5.1.1 [X] Start							###
-### 5.1.2 [] Password							###
-### 5.2 [] Tela de encerramento						###
-### 5.2.1 [] Passou de fase						###
+### 5.1.2 [X] Password							###
+### 5.2 [X] Tela de encerramento					###
+### 5.2.1 [X] Passou de fase						###
 ### 5.2.2 [X] Zerou							###
-### 5.2.3 [] Perdeu							###
-### 6. [] Imprimir os elementos dinâmicos				###
-### 7. [] Colisões com objetos dinâmicos				###
-### 8. [] Inimigos							###
+### 5.2.3 [X] Perdeu							###
+### 6. [X] Imprimir os elementos dinâmicos				###
+### 7. [X] Colisões com objetos dinâmicos				###
+### 8. [X] Inimigos							###
 ### 9. [] Colisões com ataques inimigos					###
-### 10. [] Morte							###
+### 10. [X] Morte							###
+### Lembrete: Fazer o loop de captura de tecla no loop de jogo    	###
 ###########################################################################
 .data
 .include "./common.asm"
@@ -112,24 +113,53 @@ OST_FIM:
 #    READ AND CHECK PASSWORD	#
 #################################
 PASSWORD:
-	exit()
+	SWITCH_FRAME()
+	frame_address(a1)
+	mv t0,a1
+	la s0,password_screen
+	jal IMPRIME
+	frame_refresh()
+	li s0, MMIO_set
+PW_POLL_LOOP:		
+	lb t1,(s0)
+	beqz t1,PW_POLL_LOOP		
+	li s11,MMIO_add
+	lw s11, (s11)			
+	li t0, PW_STAGE_ONE
+	beq t0,s11,STAGE_ONE
+	li t0, PW_STAGE_TWO
+	beq t0,s11,STAGE_TWO
+	li t0, PW_STAGE_THREE
+	beq t0,s11,STAGE_THREE
+	li t0, PW_STAGE_FOUR
+	beq t0,s11,STAGE_FOUR
+	j START_MENU
 #################################
-#    RESET WALKABLE BLOCKS	#
+#    	RESET ALL BLOCKS	#
 #################################
-# Set all blocks as walkable	#
+# Set all blocks to standard	#
 #################################	
-RESET_WALKABLE_BLOCKS:
+RESET_BLOCKS:
+	la t0,KEY_BLOCKS
 	la t1,WALKABLE_BLOCKS
+	la t5,BRIDGE_BLOCKS
+	la t6,MORTAL_BLOCKS
 	li t2,121
 	li t3,0
-RWB_LOOP:
-	bge t3,t2,RWB_FORA
+RB_LOOP:
+	bge t3,t2,RB_FORA
 	li t4,0
+	sb t4,(t0)
 	sb t4,(t1)
+	sb t4,(t5)
+	sb t4,(t6)
+	addi t0,t0,1
 	addi t1,t1,1
-	addi t3,t3,1
-	j RWB_LOOP
-RWB_FORA:
+	addi t5,t5,1
+	addi t6,t6,1
+	addi t3,t3,1	# contador
+	j RB_LOOP
+RB_FORA:
 	ret
 #################################
 #    	OPEN OR CLOSE DOOR	#
@@ -152,5 +182,6 @@ KT_OPEN_DOOR:
 	ret
 
 .include "game.asm"
+.include "enemy.asm"
 .include "walk.asm"
 .include "render.asm"
