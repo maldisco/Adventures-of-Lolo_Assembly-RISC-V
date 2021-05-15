@@ -30,30 +30,32 @@ GAMEPLAY:
 	li s0, MMIO_set
 	li a7,30
 	ecall
+	# Salva o horário no momento em que a fase começou
 	SAVEW(a0,CLOCK)
-POLL_LOOP:				# LOOP de leitura e captura de tecla
-#	li s0, MMIO_set
+POLL_LOOP:				
 	lb a6,(s0)
-	# A cada 1 segundo o RARS executa alguma ação
+	# Carrega a estado do teclado em a6 (se 1, então algo foi digitado)
 	LOADW(t0,CURRENT_LEVEL)
 	li t1,4
-	blt t0,t1,AINDA_NAO
+	blt t0,t1,NOT_YET
 	li a7,30
 	ecall
+	# Retorna o horário atual
 	mv a1,a0
 	LOADW(t0,CLOCK)
 	sub a0,a0,t0
-	li t0,1000
-	ble a0,t0,AINDA_NAO
+	# horário atual - inicial
+	li t0,500
+	ble a0,t0,NOT_YET
+	# se maior que 500 milisegundos (0,5 segundos) executa uma ação
 	SAVEW(a1,CLOCK)
-	li a7,1
-	li a0,5
-	ecall
 	jal ENEMY_WALK
-AINDA_NAO:
-	#
-	beqz a6,POLL_LOOP		# Enquanto não houver nenhuma tecla apertada, retorna ao loop
+NOT_YET:
+	beqz a6,POLL_LOOP
+	# Testa se algo foi digitado, se não, retorna ao loop		
 	li s11,MMIO_add
-	lw s11, (s11)			# Tecla capturada em S11
+	lw s11, (s11)			
+	# Tecla capturada em s11
 	jal LOLO_WALK
+	# Executa a movimentação do LOLO
 	j POLL_LOOP	

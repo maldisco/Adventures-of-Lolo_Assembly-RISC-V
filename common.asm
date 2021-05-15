@@ -79,10 +79,9 @@ ENEMY_FINAL_BLOCK:	.word 0
 .include "./sprites/bg/death.data"
 .include "./sprites/bg/password_screen.data"
 
-########################################################
-#             PRINTS A 16X16 SPRITE ON THE	       #	 	
-#	        (X,Y) COORDINATES PASSED	       #
-########################################################
+######################################################
+# Imprime uma sprite(fixa) 16x16 nas coordenadas x,y #
+######################################################
 .macro PRINT_STC_IMG(%sprite, %x, %y)
 # escolhe a frame aonde a sprite será desenhada
 frame_address(a1)
@@ -109,9 +108,9 @@ li t2, 0xffffff80
 # ==========================================================
 jal PS_LOOP
 .end_macro
-########################################################
-#       PRINTS THE DOOR IN HER USUAL COORDINATES       #
-########################################################
+########################################
+# Imprime a porta (coordenadas padrão) #
+########################################
 .macro PRINT_DOOR()
 frame_address(a1)
 LOADW(t0, DOOR_STATE)
@@ -138,20 +137,18 @@ li t2, 0xffffff80
 # ==========================================================
 jal PS_LOOP
 .end_macro
-########################################################
-#           PRINTS 'N' 16x16 SPRITES ON THE	       #	 	
-#	    	(X,Y) COORDINATES PASSED	       #
-########################################################
+######################################################################
+# Marca N blocos a partir da coordenada X,Y como blocos não andáveis #
+######################################################################
 .macro mark_as_block(%n, %x, %y)
 li a0, %n
 li a2, %x
 li a3, %y
 jal MARK_AS_BLOCK
 .end_macro
-#######################################################
-#            PRINTS A 16X16 SPRITE ON THE	       #	 	
-#	 (X,Y)COORDINATES STORED IN AN ADDRESS	       #
-########################################################
+##########################################################################
+# Imprime uma sprite 16x16 a partir de um endereço encontrado na memória #
+##########################################################################
 .macro PRINT_DYN_IMG(%sprite, %current_x, %current_y)
 # escolhe a frame aonde a sprite será desenhada
 frame_address(a1)
@@ -178,11 +175,9 @@ li t2, 0xffffff80
 # ==========================================================
 jal PS_LOOP
 .end_macro
-########################################################
-#             PRINTS A 16X16 SPRITE ON THE	       #	 	
-#	        (X,Y) COORDINATES PASSED	       #
-#		AND SET IT AS A KEY BLOCK	       #
-########################################################
+################################################
+# Marca o bloco nas coordenadas x,y como chave #
+################################################
 .macro mark_as_key(%x, %y)
 li t3, %y
 li t2, %x
@@ -193,11 +188,9 @@ add t0,t0,t1
 li t1,1
 sb t1,(t0)
 .end_macro
-#######################################################
-#             PRINTS A 16X16 SPRITE ON THE	       #	 	
-#	        (X,Y) COORDINATES PASSED	       #
-#	       AND SET IT AS A MORTAL BLOCK	       #
-########################################################
+#################################################
+# Marca o bloco nas coordenadas x,y como mortal #
+#################################################
 .macro mark_as_mortal(%x, %y)
 li t3, %y
 li t2, %x
@@ -208,11 +201,9 @@ add t0,t0,t1
 li t1,1
 sb t1,(t0)
 .end_macro
-#######################################################
-#             PRINTS A 16X16 SPRITE ON THE	       #	 	
-#	        (X,Y) COORDINATES PASSED	       #
-#	       AND SET IT AS A MORTAL BLOCK	       #
-########################################################
+#################################################
+# Marca o bloco nas coordenadas x,y como ponte  #
+#################################################
 .macro mark_as_bridge(%x, %y)
 li t3, %y
 li t2, %x
@@ -223,29 +214,29 @@ add t0,t0,t1
 li t1,1
 sb t1,(t0)
 .end_macro
-########################################################
-#          ERASE A BLOCK IN LOLO'S COORDINATES	       #
-########################################################
+################################################
+# Apaga o bloco nas coordenadas atuais de Lolo #
+################################################
 .macro ERASE_BLOCK()
 SWITCH_FRAME()
 PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
 SWITCH_FRAME()
 .end_macro
-#######################################################
-#   		    BLOCK RESET 		       #
-########################################################
+############################################
+# Reseta o estado dos blocos para o padrão #
+############################################
 .macro reset_blocks()
 jal RESET_BLOCKS
 .end_macro
-#######################################################
-#   		    START MENU			       #
-########################################################
+#################################
+# Apenas chama o menu principal #
+#################################
 .macro start_menu()
 j START_MENU
 .end_macro
-########################################################
-#   		    RENDER STAGE 1		       #
-########################################################
+#############################
+# Renderiza a primeira fase #
+#############################
 .macro stage_one()
 frame_address(a1)
 mv t0,a1	
@@ -272,9 +263,9 @@ mark_as_block(8,74,180 )
 mark_as_block(8,74,196 )
 mark_as_block(1,234,196 )	
 .end_macro
-########################################################
-#   		    PRINT STAGE 2		       #
-########################################################
+#############################
+# Renderiza a segunda fase  #
+#############################
 .macro stage_two()
 li t1,2
 SAVEW(t1,CURRENT_LEVEL)
@@ -307,9 +298,9 @@ mark_as_block(4,74,196)
 mark_as_key(218,196)
 mark_as_block(1,234,196)
 .end_macro
-########################################################
-#   		    PRINT STAGE 3		       #
-########################################################
+##############################
+# Renderiza a terceira fase  #
+##############################
 .macro stage_three()
 li t1,3
 SAVEW(t1,CURRENT_LEVEL)
@@ -357,9 +348,9 @@ mark_as_block(1,202,180)
 mark_as_key(234, 196)
 mark_as_block(1,218,164)
 .end_macro
-########################################################
-#   		    INIT STAGE 4		       #
-########################################################
+###########################
+# Renderiza a quarta fase #
+###########################
 .macro stage_four()
 li t1,4
 SAVEW(t1,CURRENT_LEVEL)
@@ -429,10 +420,10 @@ mark_as_key(154,116)
 set_enemy(106,164,16,89,97)
 .end_macro
 ########################################################
-#  Set and enemy, in (%posx, %posy) coordinates, that  #
-#  goes from initial block to final block and walks    #
-#  %speed pixels per second 			       #		       
-######################################################## 
+# Configura um inimigo nas posições X,Y, com uma velo- #
+# cidade específica e blocos inicial e final por onde  #
+# ele vai se movimentar				       #		       
+########################################################
 .macro set_enemy(%posx,%posy,%speed,%initial_block,%final_block)
 li t1,%posx
 SAVEW(t1,ENEMY_POSX)
@@ -446,21 +437,22 @@ li t1,%final_block
 SAVEW(t1,ENEMY_FINAL_BLOCK)
 PRINT_DYN_IMG(enemy,ENEMY_POSX,ENEMY_POSY)
 .end_macro
-########################################################
-#   		    SOUNDTRACK			       #
-########################################################
+#############################
+# Apenas chama a soundtrack #
+#############################
 .macro ost()
 jal SOUNDTRACK
 .end_macro
-########################################################
-#   		       GAME			       #
-########################################################
+#######################
+# Apenas chama o jogo #
+#######################
 .macro game()
 j GAME
 .end_macro
-########################################################
-#   		      ENDING			       #
-########################################################
+###############################################
+# Executa o encerramento do jogo (zerando)    #
+# Tela preta -> tela de encerramento + musica #
+###############################################
 .macro ending()
 sleep(2000)
 LOADW(t3,CURRENT_FRAME)
@@ -472,9 +464,10 @@ jal IMPRIME
 ost()
 start_menu()
 .end_macro
-########################################################
-#   		      RIP			       #
-########################################################
+###############################################
+# Executa o encerramento do jogo (morrendo)   #
+# Tela preta -> tela de morte + musica        #
+###############################################
 .macro you_died()
 sleep(2000)
 LOADW(t3,CURRENT_FRAME)
@@ -486,9 +479,9 @@ jal IMPRIME
 ost()
 start_menu()
 .end_macro
-########################################################
-#   		 FINISHED LEVEL			       #
-########################################################
+########################################
+# Procedimentos após o fim de uma fase #
+########################################
 .macro  finished_level()
 sleep(2000)
 LOADW(t1, CURRENT_LEVEL)
@@ -497,9 +490,10 @@ SAVEW(t1, CURRENT_LEVEL)
 reset()
 game()
 .end_macro
-########################################################
-#        PRINT A BLACK SCREEN THEN LEVEL TITLE	       #
-########################################################
+##########################
+# Procedimentos pré-fase #
+# Tela preta -> título   #
+##########################
 .macro level_title(%level)
 LOADW(t3,CURRENT_FRAME)
 jal BLACK_SCREEN
@@ -511,27 +505,25 @@ jal IMPRIME
 sleep(3500)
 .end_macro
 ########################################################
-#             LOAD THE CONTENT OF AN ADDRESS	       #
-#		    INTO A REGISTER	       	       #
+#  Carrega um conteúdo na memória para um registrador  #	
 ########################################################
 .macro LOADW(%reg, %label)
 li %reg,0
 la %reg,%label
 lw %reg,(%reg)
 .end_macro
-########################################################
-#             RETURN FRAME ADDRESS		       #
-########################################################
+######################################
+#  Retorna o endereço da frame atual #	
+######################################
 .macro frame_address(%reg)
 LOADW(%reg,CURRENT_FRAME)
 li t0,0xff0
 add %reg,t0,%reg
 slli %reg,%reg,20
 .end_macro
-########################################################
-#             CALCULATE THE BLOCK USING		       #
-#		 THE COORDINATES (X,Y)	       	       #
-########################################################
+###################################################
+# Calcula o bloco utilizando as coordenadas (X,Y) #
+###################################################
 .macro CALCULATE_BLOCK(%regx,%regy)
 mv t1,%regx
 mv t3,%regy
@@ -544,26 +536,25 @@ div t3,t3,t2		# Y grid = T3
 li t2,11
 mul t3,t3,t2		
 add t1,t1,t3		# Bloco (x,y) = T1
-# Returns T1 as XY block
+# Retorna T1 como bloco (x,y)
 .end_macro
-########################################################
-#          STORES THE CONTENT OF A REGISTER	       #
-#	      IN THE ADDRESS OF A LABEL	       	       #
-########################################################
+#################################################
+# Salva na memória o conteúdo de um registrador #
+#################################################
 .macro SAVEW(%reg, %label)
 la t0,%label
 sw %reg,(t0)
 .end_macro
-########################################################
-#                  EXIT THE PROGRAM		       #	
-########################################################
+################################################
+# Sai do programa <---------- lembra de apagar #	
+################################################
 .macro exit()
 li a7,10
 ecall
 .end_macro
-########################################################
-#         THINGS TO RESET AFTER EVERY LEVEL	       #	
-########################################################
+####################################################
+# Reseta blocos, estado da porta e posição do Lolo #	
+####################################################
 .macro reset()
 reset_blocks()
 li t1,1
@@ -573,25 +564,26 @@ SAVEW(t1,LOLO_POSX)
 li t1,36
 SAVEW(t1,LOLO_POSY)
 .end_macro
-########################################################
-#             SWITCH CURRENT FRAME		       #	
-########################################################
+#################################################
+# Troca o estado da frame armazenado na memória #
+# PS: não troca a frame no bitmap		#	
+#################################################
 .macro SWITCH_FRAME()
 LOADW(t1,CURRENT_FRAME)
 xori t1,t1,0x001
 SAVEW(t1,CURRENT_FRAME)
 .end_macro
-########################################################
-#             GO TO CURRENT FRAME		       #	
-########################################################
+###############################################################
+# Troca a frame no bitmap para o estado armazenado na memória #	
+###############################################################
 .macro frame_refresh()
 LOADW(t1,CURRENT_FRAME)
 li t0,FRAME_SELECT
 sw t1,(t0)
 .end_macro
-########################################################
-#             DOOR REFRESH (OPEN, CLOSE)	       #	
-########################################################
+###############################################
+# Atualiza o estado da porta (aberta,fechada) #	
+###############################################
 .macro door_refresh()
 LOADW(t1, KEY_COUNTER)
 jal KEY_TEST
@@ -600,9 +592,9 @@ SWITCH_FRAME()
 PRINT_DOOR()
 SWITCH_FRAME()
 .end_macro
-########################################################
-#             SLEEP FOR N MILLISECONDS		       #	
-########################################################
+###################################
+# Pausa o programa por N segundos #	
+###################################
 .macro sleep(%n)
 li a0,%n
 li a7,32
