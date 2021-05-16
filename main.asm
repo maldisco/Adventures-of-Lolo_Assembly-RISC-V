@@ -183,6 +183,7 @@ DT_OPEN:
 	ret
 ##########################################
 # Abre a porta após pegar a ultima chave #
+# t1 = número de chaves restantes 	 #
 ##########################################
 KEY_TEST:
 	beqz t1, KT_OPEN_DOOR
@@ -207,12 +208,17 @@ CT_1:
 CT_HIT:
 	LOADW(t1,LIFE_COUNTER)
 	addi t1,t1,-1
+	bnez t1,CT_ALIVE
+	you_died()
+CT_ALIVE:
+	SAVEW(t1,LIFE_COUNTER)
 	li t1,74
 	li t2,36
 	SAVEW(t1,LOLO_POSX)
 	SAVEW(t2,LOLO_POSY)
 	ret
-	
+
+			
 .include "game.asm"
 .include "enemy.asm"
 .include "walk.asm"

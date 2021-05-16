@@ -8,6 +8,8 @@ GAME:
 	beq t0,t1,STAGE_THREE
 	li t1,4
 	beq t0,t1,STAGE_FOUR
+#	li t1,5
+#	beq t0,t1,FINAL_STAGE
 	ending()
 STAGE_ONE:
 	level_title(fase_1)
@@ -24,6 +26,10 @@ STAGE_THREE:
 STAGE_FOUR:
 	level_title(fase_4)
 	stage_four()
+	j GAMEPLAY
+#FINAL_STAGE:
+#	level_title(fase_5)
+#	final_stage()
 GAMEPLAY:
 	SWITCH_FRAME()
 	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
@@ -47,7 +53,7 @@ POLL_LOOP:
 	# horário atual - inicial
 	li t0,500
 	ble a0,t0,NOT_YET
-	# se maior que 500 milisegundos (0,5 segundos) executa uma ação
+	# se maior que 500 milisegundos, executa uma ação
 	SAVEW(a1,CLOCK)
 	jal ENEMY_WALK
 NOT_YET:

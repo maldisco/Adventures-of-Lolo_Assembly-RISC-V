@@ -71,10 +71,12 @@ ENEMY_FINAL_BLOCK:	.word 0
 .include "./sprites/bg/fase_2.data"
 .include "./sprites/bg/fase_3.data"
 .include "./sprites/bg/fase_4.data"
+.include "./sprites/bg/fase_5.data"
 .include "./sprites/bg/stage_one.data"
 .include "./sprites/bg/stage_two.data"
 .include "./sprites/bg/stage_three.data"
 .include "./sprites/bg/stage_four.data"
+.include "./sprites/bg/final_stage.data"
 .include "./sprites/bg/ending.data"
 .include "./sprites/bg/death.data"
 .include "./sprites/bg/password_screen.data"
@@ -419,6 +421,7 @@ mark_as_mortal(186,132)
 mark_as_key(154,116)
 set_enemy(106,164,16,89,97)
 .end_macro
+
 ########################################################
 # Configura um inimigo nas posições X,Y, com uma velo- #
 # cidade específica e blocos inicial e final por onde  #
@@ -471,6 +474,8 @@ start_menu()
 .macro you_died()
 sleep(2000)
 LOADW(t3,CURRENT_FRAME)
+li t2, FRAME_SELECT
+sw t3(t2)
 jal BLACK_SCREEN
 frame_address(t1)
 mv t0,t1

@@ -1,5 +1,5 @@
 #################################
-#      LOOP PRINT 1 SPRITE	#		 
+# Loop imprime uma sprite 16x16 #		 
 #################################
 PS_LOOP: 	
 	bge a1,a2,PS_FORA		# Se for o último endereço então sai do loop
@@ -18,9 +18,9 @@ PS_PULA:
 	j PS_LOOP			# volta a verificar
 PS_FORA:
 	ret
-#################################
-#     	RENDER BACKGROUND	#
-#################################
+##########################################
+# Imprime algo em toda a frame (320x240) #
+##########################################
 IMPRIME:
 	lw t4,0(s0)		# numero de colunas
 	lw t5,4(s0)		# numero de linhas
@@ -37,7 +37,9 @@ I_LOOP1:
 	j I_LOOP1		# volta a verificar
 I_FIM:	
 	ret
-
+####################################
+# Marca as coordenadas como bloco  #
+####################################
 MARK_AS_BLOCK:
 	mv t1, a2
 	mv t2, a3
@@ -48,7 +50,6 @@ MARK_AS_BLOCK:
 	li t3,1
 	li t4,0
 	mv t5,a0
-# LOOP SET UNWALKABLE BLOCKS
 MAB_LOOP:	
 	bge t4,t5,MAB_LOOP_FORA	
 	sb t3,(t2)		
