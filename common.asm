@@ -24,6 +24,7 @@
 .eqv PW_STAGE_TWO	0x62	# 'B'
 .eqv PW_STAGE_THREE	0x63	# 'C'
 .eqv PW_STAGE_FOUR	0x64	# 'D'
+.eqv PW_FINAL_STAGE	0x68	# 'H'
 
 .eqv MMIO_set			0xff200000
 .eqv MMIO_add			0xff200004
@@ -47,11 +48,17 @@ MORTAL_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 BRIDGE_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 CURRENT_LEVEL:		.word 1
 CLOCK:			.word 0
-ENEMY_POSX:		.word 0
-ENEMY_POSY:		.word 0
-ENEMY_SPEED:		.word 0
-ENEMY_INITIAL_BLOCK:	.word 0
-ENEMY_FINAL_BLOCK:	.word 0
+CLOCK_2:		.word 0
+CURRENT_ENEMY_POSX:	.word 0
+ENEMY_POSX:		.word 0,0,0,0,0,0
+CURRENT_ENEMY_POSY:	.word 0
+ENEMY_POSY:		.word 0,0,0,0,0,0
+CURRENT_ENEMY_SPEED:	.word 0
+ENEMY_SPEED:		.word 0,0,0,0,0,0
+CURRENT_ENEMY_I_BLOCK:	.word 0
+ENEMY_INITIAL_BLOCK:	.word 0,0,0,0,0,0
+CURRENT_ENEMY_F_BLOCK:	.word 0
+ENEMY_FINAL_BLOCK:	.word 0,0,0,0,0,0
 
 # Include
 .include "./sprites/lolo/lolo_coca.data"
@@ -236,209 +243,57 @@ jal RESET_BLOCKS
 .macro start_menu()
 j START_MENU
 .end_macro
-#############################
-# Renderiza a primeira fase #
-#############################
-.macro stage_one()
-frame_address(a1)
-mv t0,a1	
-la s0,stage_one
-jal IMPRIME
-li t1,0
-SAVEW(t1, DOOR_STATE)
-PRINT_DOOR()
-SWITCH_FRAME()
-frame_address(a1)
-mv t0,a1	
-la s0,stage_one
-jal IMPRIME
-PRINT_DOOR()
-mark_as_block(4,122,36 )
-mark_as_block(2,218,36 )
-mark_as_block(3,138,52 )
-mark_as_block(1,234,52 )
-mark_as_block(3,138,68 )
-mark_as_block(1,170,84 )
-mark_as_block(8,74,148 )
-mark_as_block(8,74,164 )
-mark_as_block(8,74,180 )
-mark_as_block(8,74,196 )
-mark_as_block(1,234,196 )	
-.end_macro
-#############################
-# Renderiza a segunda fase  #
-#############################
-.macro stage_two()
-li t1,2
-SAVEW(t1,CURRENT_LEVEL)
-frame_address(a1)
-mv t0,a1	
-la s0,stage_two
-jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
-frame_address(a1)
-mv t0,a1	
-la s0,stage_two
-jal IMPRIME
-PRINT_DOOR()
-li t3, 3
-SAVEW(t3, KEY_COUNTER)
-mark_as_block(4,122,36)
-mark_as_block(2,218,36)
-mark_as_block(3,138,52)
-mark_as_block(1,234,52)
-mark_as_block(3,138,68)
-mark_as_key(234,68)
-mark_as_block(1,170,84)
-mark_as_block(1,170,84)
-mark_as_key(74,132)
-mark_as_block(1,74,148)
-mark_as_block(2,74,164)
-mark_as_block(3,74,180)
-mark_as_block(4,74,196)
-mark_as_key(218,196)
-mark_as_block(1,234,196)
-.end_macro
-##############################
-# Renderiza a terceira fase  #
-##############################
-.macro stage_three()
-li t1,3
-SAVEW(t1,CURRENT_LEVEL)
-frame_address(a1)
-mv t0,a1	
-la s0,stage_three
-jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
-frame_address(a1)
-mv t0,a1	
-la s0,stage_three
-jal IMPRIME
-PRINT_DOOR()
-li t3, 2
-SAVEW(t3, KEY_COUNTER)
-mark_as_block(1,90,52)
-mark_as_block(1,106,52)
-mark_as_block(1,90,68)
-mark_as_block(1,218,52)
-mark_as_block(1,202,52)
-mark_as_block(1,218,68)
-mark_as_mortal(122, 84)
-mark_as_mortal(138, 84)
-mark_as_mortal(154, 84)
-mark_as_mortal(170, 84)
-mark_as_mortal(186, 84)
-mark_as_mortal(186, 100)
-mark_as_mortal(186, 116)
-mark_as_mortal(186, 132)
-mark_as_mortal(186, 148)
-mark_as_mortal(122, 148)
-mark_as_mortal(138, 148)
-mark_as_bridge(154, 148)	
-mark_as_mortal(170, 148)
-mark_as_mortal(122, 100)
-mark_as_mortal(122, 116)
-mark_as_mortal(122, 132)
-mark_as_key(154, 116)
-mark_as_block(1,90,180)
-mark_as_block(1,106,180)
-mark_as_block(1,90,164)
-mark_as_block(1,218,180)
-mark_as_block(1,202,180)
-mark_as_key(234, 196)
-mark_as_block(1,218,164)
-.end_macro
-###########################
-# Renderiza a quarta fase #
-###########################
-.macro stage_four()
-li t1,4
-SAVEW(t1,CURRENT_LEVEL)
-frame_address(a1)
-mv t0,a1	
-la s0,stage_four
-jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
-frame_address(a1)
-mv t0,a1	
-la s0,stage_four
-jal IMPRIME
-PRINT_DOOR()
-li t3, 1
-SAVEW(t3, KEY_COUNTER)
-mark_as_mortal(90,52)
-mark_as_mortal(106,52)
-mark_as_mortal(122,52)
-mark_as_mortal(138,52)
-mark_as_mortal(154,52)
-mark_as_mortal(170,52)
-mark_as_mortal(186,52)
-mark_as_mortal(202,52)
-mark_as_mortal(218,52)
-mark_as_mortal(90,180)
-mark_as_mortal(106,180)
-mark_as_mortal(122,180)
-mark_as_mortal(138,180)
-mark_as_bridge(154,180)
-mark_as_mortal(170,180)
-mark_as_mortal(186,180)
-mark_as_mortal(202,180)
-mark_as_mortal(218,180)
-mark_as_mortal(90,84)
-mark_as_mortal(122,84)
-mark_as_mortal(138,84)
-mark_as_bridge(154,84)
-mark_as_mortal(170,84)
-mark_as_mortal(186,84)
-mark_as_mortal(122,148)
-mark_as_mortal(138,148)
-mark_as_mortal(154,148)
-mark_as_mortal(170,148)
-mark_as_mortal(186,148)
-mark_as_mortal(90,68)
-mark_as_mortal(90,84)
-mark_as_mortal(90,100)
-mark_as_mortal(90,116)
-mark_as_mortal(90,132)
-mark_as_mortal(90,148)
-mark_as_mortal(90,164)
-mark_as_mortal(218,68)
-mark_as_mortal(218,84)
-mark_as_mortal(218,100)
-mark_as_mortal(218,116)
-mark_as_mortal(218,132)
-mark_as_mortal(218,148)
-mark_as_mortal(218,164)
-mark_as_mortal(122,100)
-mark_as_mortal(122,116)
-mark_as_mortal(122,132)
-mark_as_mortal(186,100)
-mark_as_mortal(186,116)
-mark_as_mortal(186,132)
-mark_as_key(154,116)
-set_enemy(106,164,16,89,97)
-.end_macro
 
 ########################################################
 # Configura um inimigo nas posições X,Y, com uma velo- #
 # cidade específica e blocos inicial e final por onde  #
 # ele vai se movimentar				       #		       
 ########################################################
-.macro set_enemy(%posx,%posy,%speed,%initial_block,%final_block)
+.macro set_enemy(%enemy_num,%posx,%posy,%speed,%initial_block,%final_block)
+li t2,%enemy_num
+li t3,4
+mul t2,t2,t3
+la t3,ENEMY_POSX
+add t3,t3,t2
 li t1,%posx
-SAVEW(t1,ENEMY_POSX)
+sw t1,(t3)
+SAVEW(t1,CURRENT_ENEMY_POSX)
+la t3,ENEMY_POSY
+add t3,t3,t2
 li t1,%posy
-SAVEW(t1,ENEMY_POSY)
+sw t1,(t3)
+SAVEW(t1,CURRENT_ENEMY_POSY)
+la t3,ENEMY_SPEED
+add t3,t3,t2
 li t1,%speed
-SAVEW(t1,ENEMY_SPEED)
+sw t1,(t3)
+SAVEW(t1,CURRENT_ENEMY_SPEED)
+la t3,ENEMY_INITIAL_BLOCK
+add t3,t3,t2
 li t1,%initial_block
-SAVEW(t1,ENEMY_INITIAL_BLOCK)
+sw t1,(t3)
+SAVEW(t1,CURRENT_ENEMY_I_BLOCK)
+la t3,ENEMY_FINAL_BLOCK
+add t3,t3,t2
 li t1,%final_block
-SAVEW(t1,ENEMY_FINAL_BLOCK)
-PRINT_DYN_IMG(enemy,ENEMY_POSX,ENEMY_POSY)
+sw t1,(t3)
+SAVEW(t1,CURRENT_ENEMY_F_BLOCK)
+
+
+
+#li t1,%posy
+#SAVEW(t1,ENEMY_POSY)
+#SAVEW(t1,CURRENT_ENEMY_POSY)
+#li t1,%speed
+#SAVEW(t1,ENEMY_SPEED)
+#SAVEW(t1,CURRENT_ENEMY_SPEED)
+#li t1,%initial_block
+#SAVEW(t1,ENEMY_INITIAL_BLOCK)
+#SAVEW(t1,CURRENT_ENEMY_I_BLOCK)
+#li t1,%final_block
+#SAVEW(t1,ENEMY_FINAL_BLOCK)
+#SAVEW(t1,CURRENT_ENEMY_F_BLOCX)
+PRINT_DYN_IMG(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
 .end_macro
 #############################
 # Apenas chama a soundtrack #
@@ -465,6 +320,8 @@ mv t0,t1
 la s0, ending
 jal IMPRIME
 ost()
+li t1,1
+SAVEW(t1,CURRENT_LEVEL)
 start_menu()
 .end_macro
 ###############################################

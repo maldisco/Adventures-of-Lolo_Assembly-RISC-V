@@ -15,7 +15,7 @@ LOLO_WALK_UP:
 	LOADW(t3,LOLO_POSX)
 	LOADW(t2,LOLO_POSY)
 	CALCULATE_BLOCK(t3,t2)
-	# Calcula o bloco atual (abaixo) de lolo (vai ser apagado)
+	# Calcula o bloco atual de lolo (vai ser apagado)
 	la t2, BRIDGE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
@@ -44,7 +44,8 @@ LWU_IS_BRIDGE:
 	PRINT_DYN_IMG(lolo_coca, LOLO_POSX, LOLO_POSY)
 	li t3, FRAME_SELECT
 	LOADW(t1,CURRENT_FRAME)			
-	sw t1,(t3)				# Troca o frame mostrado no bitmap
+	sw t1,(t3)
+	# Se é uma porta, e está aberta, fase finalizada				
 	finished_level()
 	# Fim teste 'é uma porta'
 LWU_CONTINUE:

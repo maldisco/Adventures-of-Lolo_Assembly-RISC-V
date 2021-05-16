@@ -145,6 +145,10 @@ PW_POLL_LOOP:
 	
 	li t0, PW_STAGE_FOUR
 	beq t0,s11,STAGE_FOUR
+	
+	li t0, PW_FINAL_STAGE
+	beq t0,s11,FINAL_STAGE
+	
 	j START_MENU
 ######################################
 # Seta todos os blocos para o padrão #
@@ -198,8 +202,8 @@ KT_OPEN_DOOR:
 COLISION_TEST:
 	LOADW(t1,LOLO_POSX)
 	LOADW(t2,LOLO_POSY)
-	LOADW(t3,ENEMY_POSX)
-	LOADW(t4,ENEMY_POSY)
+	LOADW(t3,CURRENT_ENEMY_POSX)
+	LOADW(t4,CURRENT_ENEMY_POSY)
 	beq t1,t3,CT_1
 	ret
 CT_1:
@@ -216,7 +220,8 @@ CT_ALIVE:
 	li t2,36
 	SAVEW(t1,LOLO_POSX)
 	SAVEW(t2,LOLO_POSY)
-	ret
+	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
+	j CT_RETURN
 
 			
 .include "game.asm"
