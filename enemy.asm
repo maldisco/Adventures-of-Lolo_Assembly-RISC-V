@@ -68,7 +68,7 @@ EWS_LOOP:
 	CALCULATE_BLOCK(a1,a2)
 	# Elemento de aleatoriedade: Pega o tempo, divide por 13
 	# e caso o resto dessa divisão seja 0, redireciona o inimigo
-	li a7,30
+	li a7,42
 	ecall
 	li t4,13
 	rem t4,a0,t4

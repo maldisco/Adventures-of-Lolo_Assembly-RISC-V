@@ -29,7 +29,9 @@ FINAL_STAGE:
 GAMEPLAY:
 	SWITCH_FRAME()
 	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
+	sleep(500)
 	li s0, MMIO_set
+	# a0 = tempo
 	li a7,30
 	ecall
 	# Salva o horário no momento em que a fase começou
@@ -55,11 +57,13 @@ POLL_LOOP:
 	LOADW(t1,CURRENT_LEVEL)
 	li t2,4
 	beq t1,t2,STAGE_FOUR_ACTIONS
+	# Fase 5
 	LOADW(t1,CLOCK_2)
 	sub a1,a1,t1
 	li t2,20000
 	bgt a1,t2,ZEROU
 	jal ENEMIES_WALK
+	# Fase 4
 STAGE_FOUR_ACTIONS:
 	jal ENEMY_WALK
 NOT_YET:

@@ -454,6 +454,13 @@ SWITCH_FRAME()
 PRINT_DOOR()
 SWITCH_FRAME()
 .end_macro
+##############################
+# Atualiza o número de vidas #	
+##############################
+.macro lives_refresh()
+LOADW(t1, LIFE_COUNTER)
+
+.end_macro
 ###################################
 # Pausa o programa por N segundos #	
 ###################################
