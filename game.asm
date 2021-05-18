@@ -76,6 +76,7 @@ GAME:
 # Renderiza a primeira fase #
 #############################
 RENDER_STAGE_ONE:
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1
 	la s0,stage_one
@@ -83,6 +84,9 @@ RENDER_STAGE_ONE:
 	li t1,0
 	savew(t1, DOOR_STATE)
 	print_door()
+	loadw(t1,CURRENT_FRAME)
+	li t2,FRAME_SELECT
+	sw t1,(t2)
 	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
@@ -107,11 +111,15 @@ RENDER_STAGE_ONE:
 RENDER_STAGE_TWO:
 	li t1,2
 	savew(t1,CURRENT_LEVEL)
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
 	la s0,stage_two
 	jal IMPRIME
 	print_door()
+	loadw(t1,CURRENT_FRAME)
+	li t2,FRAME_SELECT
+	sw t1,(t2)
 	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
@@ -142,11 +150,15 @@ RENDER_STAGE_TWO:
 RENDER_STAGE_THREE:
 	li t1,3
 	savew(t1,CURRENT_LEVEL)
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
 	la s0,stage_three
 	jal IMPRIME
 	print_door()
+	loadw(t1,CURRENT_FRAME)
+	li t2,FRAME_SELECT
+	sw t1,(t2)
 	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
@@ -192,11 +204,15 @@ RENDER_STAGE_THREE:
 RENDER_STAGE_FOUR:
 	li t1,4
 	savew(t1,CURRENT_LEVEL)
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
 	la s0,stage_four
 	jal IMPRIME
 	print_door()
+	loadw(t1,CURRENT_FRAME)
+	li t2,FRAME_SELECT
+	sw t1,(t2)
 	switch_frame()
 	frame_address(a1)
 	mv t0,a1	

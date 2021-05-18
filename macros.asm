@@ -111,6 +111,38 @@ li t2, 0xffffff80
 # ==========================================================
 jal PS_LOOP
 .end_macro
+##########################################################################
+# Imprime uma sprite 16x16 a partir de um endereço encontrado na memória #
+##########################################################################
+.macro render_abs_sprite(%sprite, %current_x, %current_y)
+# escolhe a frame aonde a sprite será desenhada
+li a1,FRAME_0
+la s1, %sprite
+li a3,16		# todos os sprites são quadrados 16x16
+loadw( t1,%current_y )
+loadw( t2,%current_x )	
+li t3, 320
+mul t3,t1,t3		# aux = linhax320 (linha)
+add a1,a1,t3
+add a1,a1,t2		# endereço inicial = linha x 320 + coluna
+mv a2,a1		
+li t1,4816		# 15x320 +16	
+add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 	
+li t1,0x100000
+add a4,a1,t1
+addi s1,s1,8		# chega ao .text
+li t1,0			# contador
+li t2, 0xffffff80
+# ==========================================================
+# a1 = endereço inicial 
+# a2 = endereço final
+# a3 = numero de pixels a serem pintados por linha
+# a4 = endereço na frame 1
+# t1 = contador de pixels pintados
+# t2 = cor a ser substituida pelo transparente
+# ==========================================================
+jal PS_LOOP_TESTE
+.end_macro
 ################################################
 # Marca o bloco nas coordenadas x,y como chave #
 ################################################

@@ -2,6 +2,25 @@
 .include "macros.asm"
 .include "MACROSv21.s"
 .text
+
+# [] Refatorar
+# [] Contadores
+#	[] Vidas
+#	[] Chaves
+# [] Visual
+#	[] Mapa
+#	[] Inimigo
+#	[] Objetos
+# 	[] Lolo
+# [] Efeitos sonoros
+# [] Animação do inimigo
+# [] Baús
+# [] Objetos dinamicos
+# [] Refazer as fases (com oq eu tiver conseguido implementar acima)
+
+
+
+
 ###########################
 #  Executa o menu inicial #
 ###########################
@@ -27,7 +46,7 @@ START_MENU:
 	li a6, SELECT			# a2 = 'E'
 	
 	la s9, A_VAGUE_HOPE
-SM_POLL_LOOP:				# LOOP de leitura e captura de tecla
+	SM_POLL_LOOP:				# LOOP de leitura e captura de tecla
 	lb t1,(s0)	# t1 = estado do teclado (0 = nada apertado)
 	
 	lw t2,(s9)	# t2 = valor da nota
@@ -46,30 +65,30 @@ SM_POLL_LOOP:				# LOOP de leitura e captura de tecla
 		li a7,30
 		ecall		# a0 = horário atual
 		savew(a0,CLOCK)	# salva horário atual para próximo loop
-SM_NAO_TOCA:
+	SM_NAO_TOCA:
 	
 	beqz t1,SM_POLL_LOOP		
-		li s11,MMIO_add
-		lw s11, (s11)			
+	li s11,MMIO_add
+	lw s11, (s11)			
 	# Tecla capturada em S11, 'W' troca para frame 0, 'S' para frame 1 e 'E' seleciona um
 	beq s11, a6, SM_SELECTED
 	beq s11, a5, SM_START
 	beq s11, a4, SM_PASSWORD
 	j SM_POLL_LOOP
 	
-SM_START:					
+	SM_START:					
 	li t2, FRAME_SELECT
 	li t3, 0
 	sb t3,(t2)
 	j SM_POLL_LOOP
 	
-SM_PASSWORD:
+	SM_PASSWORD:
 	li t2, FRAME_SELECT
 	li t3, 1
 	sb t3,(t2)
 	j SM_POLL_LOOP
 	
-SM_SELECTED:
+	SM_SELECTED:
 	li t2, FRAME_SELECT
 	lb t3, (t2)
 	beqz t3, GAME
