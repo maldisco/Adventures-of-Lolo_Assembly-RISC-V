@@ -1,27 +1,6 @@
-###########################################################################
-### 1. [X] Imprimir os elementos estáticos				###
-### 2. [X] Movimentar o lolo com WASD					###
-### 2.1 [X] tentar implementar movimentação em blocos <- OLHA AQUI 	###
-### 3. [X] Travar a movimentação dentro do mapa				###
-### 4. [X] Colisões com objetos estáticos				###
-### 5. [X] Menu inicial e tela de encerramento				###
-### 5.1 [X] Menu inicial com 2 opções					###
-### 5.1.1 [X] Start							###
-### 5.1.2 [X] Password							###
-### 5.2 [X] Tela de encerramento					###
-### 5.2.1 [X] Passou de fase						###
-### 5.2.2 [X] Zerou							###
-### 5.2.3 [X] Perdeu							###
-### 6. [X] Imprimir os elementos dinâmicos				###
-### 7. [X] Colisões com objetos dinâmicos				###
-### 8. [X] Inimigos							###
-### 9. [] Colisões com ataques inimigos					###
-### 10. [X] Morte							###
-### Lembrete: FASE SECRETA COM PUZZLES				    	###
-### Lembrete: BOSS FINAL SANS UNDERTALE				    	###
-###########################################################################
 .data
 .include "./common.asm"
+.include "MACROSv21.s"
 .text
 main:	
 	start_menu()
@@ -33,26 +12,53 @@ main:
 START_MENU:
 	li t0, FRAME_0
 	la s0, start_menu_1
-	jal IMPRIME
+	call IMPRIME
 	# Tela com 'START' selecionado
 	li t0, FRAME_1
 	la s0, start_menu_2
-	jal IMPRIME
+	call IMPRIME
 	# Tela com 'PASSWORD' selecionado
-	li s0, MMIO_set
-	li a0, DOWN			# a0 = 'S'
-	li a1, UP			# a1 = 'W'
-	li a2, SELECT			# a2 = 'E'
 	
+	# a0 = tempo
+	li a7,30
+	ecall
+	# Salva o horário no momento em que entrou no menu
+	savew(a0,CLOCK)
+	
+	li s0, MMIO_set
+	li a4, DOWN			# a0 = 'S'
+	li a5, UP			# a1 = 'W'
+	li a6, SELECT			# a2 = 'E'
+	
+	la s9, A_VAGUE_HOPE
 SM_POLL_LOOP:				# LOOP de leitura e captura de tecla
-	lb t1,(s0)
+	lb t1,(s0)	# t1 = estado do teclado (0 = nada apertado)
+	
+	lw t2,(s9)	# t2 = valor da nota
+	lw t3,4(s9)	# t3 = duração da nota
+	li a7,30
+	ecall		# a0 = horário atual
+	loadw(t4,CLOCK)	# t4 = horário no loop anterior
+	sub t4,a0,t4	# t4  = a0-t4 = passagem de tempo
+	ble t4,t3,SM_NAO_TOCA	# se a passagem for maior que a duração da nota, entra
+		mv a0,t2
+		mv a1,t3
+		li a2,7			# instrumento
+		li a3,30		# volume
+		call midiOut		# toca a nota
+		addi s9,s9,8
+		li a7,30
+		ecall		# a0 = horário atual
+		savew(a0,CLOCK)	# salva horário atual para próximo loop
+SM_NAO_TOCA:
+	
 	beqz t1,SM_POLL_LOOP		
 	li s11,MMIO_add
 	lw s11, (s11)			
 	# Tecla capturada em S11, 'W' troca para frame 0, 'S' para frame 1 e 'E' seleciona um
-	beq s11, a2, SM_SELECTED
-	beq s11, a1, SM_START
-	beq s11, a0, SM_PASSWORD
+	beq s11, a6, SM_SELECTED
+	beq s11, a5, SM_START
+	beq s11, a4, SM_PASSWORD
 	j SM_POLL_LOOP
 	
 SM_START:					
@@ -72,7 +78,6 @@ SM_SELECTED:
 	lb t3, (t2)
 	beqz t3, GAME
 	j PASSWORD
-
 #########################################	
 # Imprime uma tela preta no frame atual #	
 #########################################
@@ -95,9 +100,9 @@ BS_FORA:
 # Lê e reproduz notas #
 #######################	
 SOUNDTRACK:
-	la s0,GOLDEN_WIND_NUM		# define o endereço do número de notas
+	la s0,LAST_GOODBYE_NUM		# define o endereço do número de notas
 	lw s1,0(s0)		# le o numero de notas
-	la s0,GOLDEN_WIND_NOTES		# define o endereço das notas
+	la s0,LAST_GOODBYE		# define o endereço das notas
 	li t0,0			# zera o contador de notas
 	li a2,7			# define o instrumento
 	li a3,30		# define o volume
@@ -121,7 +126,7 @@ OST_FIM:
 # Lê e checa o password	#
 #########################
 PASSWORD:
-	SWITCH_FRAME()
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1
 	la s0,password_screen
@@ -149,7 +154,13 @@ PW_POLL_LOOP:
 	li t0, PW_FINAL_STAGE
 	beq t0,s11,FINAL_STAGE
 	
+	li t0,PW_ENDING
+	beq t0,s11,NO_CHEATING
+	
 	j START_MENU
+	
+NO_CHEATING:
+	ending()
 ######################################
 # Seta todos os blocos para o padrão #
 ######################################	
@@ -176,7 +187,7 @@ RB_LOOP:
 RB_FORA:
 	ret
 #############################
-# Refresca o estado a porta #
+# Atualiza o estado a porta #
 #############################
 DOOR_TEST:
 	beqz t0, DT_OPEN
@@ -193,34 +204,34 @@ KEY_TEST:
 	beqz t1, KT_OPEN_DOOR
 	ret
 KT_OPEN_DOOR:
-	SAVEW(t1,DOOR_STATE)
+	savew(t1,DOOR_STATE)
 	ret
 
 ##########################################
 # Testar colisão entre lolo e um inimigo #
 ##########################################
 COLISION_TEST:
-	LOADW(t1,LOLO_POSX)
-	LOADW(t2,LOLO_POSY)
-	LOADW(t3,CURRENT_ENEMY_POSX)
-	LOADW(t4,CURRENT_ENEMY_POSY)
+	loadw(t1,LOLO_POSX)
+	loadw(t2,LOLO_POSY)
+	loadw(t3,CURRENT_ENEMY_POSX)
+	loadw(t4,CURRENT_ENEMY_POSY)
 	beq t1,t3,CT_1
 	ret
 CT_1:
 	beq t2,t4,CT_HIT
 	ret
 CT_HIT:
-	LOADW(t1,LIFE_COUNTER)
+	loadw(t1,LIFE_COUNTER)
 	addi t1,t1,-1
 	bnez t1,CT_ALIVE
 	you_died()
 CT_ALIVE:
-	SAVEW(t1,LIFE_COUNTER)
+	savew(t1,LIFE_COUNTER)
 	li t1,74
 	li t2,36
-	SAVEW(t1,LOLO_POSX)
-	SAVEW(t2,LOLO_POSY)
-	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
+	savew(t1,LOLO_POSX)
+	savew(t2,LOLO_POSY)
+	render_sprite(lolo_coca,LOLO_POSX,LOLO_POSY)
 	j CT_RETURN
 
 			
@@ -228,3 +239,4 @@ CT_ALIVE:
 .include "enemy.asm"
 .include "walk.asm"
 .include "render.asm"
+.include "SYSTEMv21.s"

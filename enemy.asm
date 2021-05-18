@@ -1,35 +1,52 @@
+.data
+CURRENT_ENEMY_POSX:	.word 0
+ENEMY_POSX:		.word 0,0,0,0,0,0
+
+CURRENT_ENEMY_POSY:	.word 0
+ENEMY_POSY:		.word 0,0,0,0,0,0
+
+CURRENT_ENEMY_SPEED:	.word 0
+ENEMY_SPEED:		.word 0,0,0,0,0,0
+
+CURRENT_ENEMY_I_BLOCK:	.word 0
+ENEMY_INITIAL_BLOCK:	.word 0,0,0,0,0,0
+
+CURRENT_ENEMY_F_BLOCK:	.word 0
+ENEMY_FINAL_BLOCK:	.word 0,0,0,0,0,0
+
+.text
 ENEMY_WALK:
-	PRINT_DYN_IMG(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	PRINT_DYN_IMG(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	LOADW(a1,CURRENT_ENEMY_POSX)
-	LOADW(a2,CURRENT_ENEMY_POSY)
-	LOADW(a3,CURRENT_ENEMY_SPEED)
-	add a1,a1,a3
-	CALCULATE_BLOCK(a1,a2)
-	LOADW(t2,CURRENT_ENEMY_F_BLOCK)
-	bne t1,t2,EW_KEEP
-	li t2,-16
-	SAVEW(t2,CURRENT_ENEMY_SPEED)
+	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
+	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame() 			# Apaga o bloco atual
+	loadw(a1,CURRENT_ENEMY_POSX)	
+	loadw(a2,CURRENT_ENEMY_POSY)
+	loadw(a3,CURRENT_ENEMY_SPEED)
+	add a1,a1,a3			
+	calculate_block(a1,a2)		# Calcula a proxima posição do inimigo
+	loadw(t2,CURRENT_ENEMY_F_BLOCK)
+	bne t1,t2,EW_KEEP		# Se ela for a posição final
+	li t2,-16			
+	savew(t2,CURRENT_ENEMY_SPEED)	# Velocidade recebe a direção oposta
 	j EW_WALK
 EW_KEEP:
-	LOADW(t2,CURRENT_ENEMY_I_BLOCK)
+	loadw(t2,CURRENT_ENEMY_I_BLOCK)	# Se ela for a posição inicial
 	bne t1,t2,EW_WALK
 	li t2,16
-	SAVEW(t2,CURRENT_ENEMY_SPEED)
+	savew(t2,CURRENT_ENEMY_SPEED)	# Velocidade recebe a direção oposta
 EW_WALK:
-	LOADW(a1,CURRENT_ENEMY_POSX)
-	LOADW(a2,CURRENT_ENEMY_POSY)
-	LOADW(a3,CURRENT_ENEMY_SPEED)
+	loadw(a1,CURRENT_ENEMY_POSX)
+	loadw(a2,CURRENT_ENEMY_POSY)
+	loadw(a3,CURRENT_ENEMY_SPEED)
 	add a1,a1,a3
-	SAVEW(a1,CURRENT_ENEMY_POSX)
-	jal COLISION_TEST
+	savew(a1,CURRENT_ENEMY_POSX)
+	call COLISION_TEST		# Testa colisão com Lolo
 CT_RETURN:
-	PRINT_DYN_IMG(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	PRINT_DYN_IMG(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
+	render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
+	render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()			# Renderiza o inimigo na próxima posição
 	j POLL_LOOP
 	
 #######################################################################
@@ -47,62 +64,60 @@ ENEMIES_WALK:
 EWS_LOOP:
 	beq t5,t6,EWS_DONE	# inicio loop
 	lw t3,(s3)
-	SAVEW(t3,CURRENT_ENEMY_POSX)	
+	savew(t3,CURRENT_ENEMY_POSX)	
 	lw t3,(s4)
-	SAVEW(t3,CURRENT_ENEMY_POSY)
+	savew(t3,CURRENT_ENEMY_POSY)
 	lw t3,(s5)
-	SAVEW(t3,CURRENT_ENEMY_SPEED)
+	savew(t3,CURRENT_ENEMY_SPEED)
 	lw t3,(s6)
-	SAVEW(t3,CURRENT_ENEMY_I_BLOCK)
+	savew(t3,CURRENT_ENEMY_I_BLOCK)
 	lw t3,(s7)
-	SAVEW(t3,CURRENT_ENEMY_F_BLOCK)
+	savew(t3,CURRENT_ENEMY_F_BLOCK)
 	#
-	PRINT_DYN_IMG(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	PRINT_DYN_IMG(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	LOADW(a1,CURRENT_ENEMY_POSX)
-	LOADW(a2,CURRENT_ENEMY_POSY)
-	LOADW(a3,CURRENT_ENEMY_SPEED)
+	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
+	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
+	loadw(a1,CURRENT_ENEMY_POSX)
+	loadw(a2,CURRENT_ENEMY_POSY)
+	loadw(a3,CURRENT_ENEMY_SPEED)
 	add a1,a1,a3
-	CALCULATE_BLOCK(a1,a2)
-	# Elemento de aleatoriedade: Pega o tempo, divide por 13
-	# e caso o resto dessa divisão seja 0, redireciona o inimigo
+	calculate_block(a1,a2)
 	li a7,42
-	ecall
+	ecall		# a0 = numero aleatorio
 	li t4,13
-	rem t4,a0,t4
-	bnez t4,EWS_RNG
+	rem t4,a0,t4	# t4 = resto entre a0 e 13
+	bnez t4,EWS_RNG	
 	li t4,-1
-	mul a3,a3,t4
-	SAVEW(a3,CURRENT_ENEMY_SPEED)
+	mul a3,a3,t4	# Se o resto for igual a 0, o inimigo começa a ir para a direção oposta
+	savew(a3,CURRENT_ENEMY_SPEED)
 	sw a3,(s5)
 EWS_RNG:
- 	#
-	LOADW(t2,CURRENT_ENEMY_F_BLOCK)
+ 	# 
+	loadw(t2,CURRENT_ENEMY_F_BLOCK)
 	bne t1,t2,EWS_KEEP
 	li t2,-16
-	SAVEW(t2,CURRENT_ENEMY_SPEED)
+	savew(t2,CURRENT_ENEMY_SPEED)
 	sw t2,(s5)
 	j EWS_WALK
 EWS_KEEP:
-	LOADW(t2,CURRENT_ENEMY_I_BLOCK)
+	loadw(t2,CURRENT_ENEMY_I_BLOCK)
 	bne t1,t2,EWS_WALK
 	li t2,16
-	SAVEW(t2,CURRENT_ENEMY_SPEED)
+	savew(t2,CURRENT_ENEMY_SPEED)
 	sw t2,(s5)
 EWS_WALK:
-	LOADW(a1,CURRENT_ENEMY_POSX)
-	LOADW(a2,CURRENT_ENEMY_POSY)
-	LOADW(a3,CURRENT_ENEMY_SPEED)
+	loadw(a1,CURRENT_ENEMY_POSX)
+	loadw(a2,CURRENT_ENEMY_POSY)
+	loadw(a3,CURRENT_ENEMY_SPEED)
 	add a1,a1,a3
-	SAVEW(a1,CURRENT_ENEMY_POSX)
+	savew(a1,CURRENT_ENEMY_POSX)
 	sw a1,(s3)
-	jal COLISION_TEST
-	PRINT_DYN_IMG(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
-	PRINT_DYN_IMG(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
-	SWITCH_FRAME()
+	call COLISION_TEST
+	render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
+	render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+	switch_frame()
 	#
 	addi s3,s3,4
 	addi s4,s4,4

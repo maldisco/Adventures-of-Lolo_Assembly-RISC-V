@@ -1,5 +1,5 @@
 GAME:	
-	LOADW(t0,CURRENT_LEVEL)
+	loadw(t0,CURRENT_LEVEL)
 	li t1,1
 	beq t0,t1,STAGE_ONE
 	li t1,2
@@ -27,56 +27,51 @@ FINAL_STAGE:
 	level_title(fase_5)
 	j RENDER_FINAL_STAGE
 GAMEPLAY:
-	SWITCH_FRAME()
-	PRINT_DYN_IMG(lolo_coca,LOLO_POSX,LOLO_POSY)
+	switch_frame()
+	render_sprite(lolo_coca,LOLO_POSX,LOLO_POSY)
 	sleep(500)
 	li s0, MMIO_set
 	# a0 = tempo
 	li a7,30
 	ecall
 	# Salva o horário no momento em que a fase começou
-	SAVEW(a0,CLOCK)
-	SAVEW(a0,CLOCK_2)
+	savew(a0,CLOCK)
+	savew(a0,CLOCK_2)
 POLL_LOOP:				
-	lb a6,(s0)
-	# Carrega a estado do teclado em a6 (se 1, então algo foi digitado)
-	LOADW(t0,CURRENT_LEVEL)
+	lb a6,(s0) # a6 = estado do teclado
+	
+	loadw(t0,CURRENT_LEVEL)
 	li t1,4
 	blt t0,t1,NOT_YET
 	li a7,30
-	ecall
-	# Retorna o horário atual
+	ecall # Retorna o horário atual
 	mv a1,a0
-	LOADW(t0,CLOCK)
-	sub a0,a0,t0
-	# horário atual - inicial
+	loadw(t0,CLOCK)
+	sub a0,a0,t0 # a0 = horário atual - inicial
 	li t0,150
-	ble a0,t0,NOT_YET
-	# se maior que 200 milisegundos, executa uma ação
-	SAVEW(a1,CLOCK)
-	LOADW(t1,CURRENT_LEVEL)
+	ble a0,t0,NOT_YET # se a0 maior que 150 milisegundos, executa uma ação
+	savew(a1,CLOCK)	
+	loadw(t1,CURRENT_LEVEL)
 	li t2,4
 	beq t1,t2,STAGE_FOUR_ACTIONS
-	# Fase 5
-	LOADW(t1,CLOCK_2)
+	# Fase 5 -> ações
+	loadw(t1,CLOCK_2)
 	sub a1,a1,t1
-	li t2,20000
-	bgt a1,t2,ZEROU
-	jal ENEMIES_WALK
-	# Fase 4
+	li t2,20000 # Se passaram 20 segundos desde o início da fase, passou de fase
+	bgt a1,t2,FINAL_STAGE_END
+	call ENEMIES_WALK
+	# Fase 4 -> ações
 STAGE_FOUR_ACTIONS:
-	jal ENEMY_WALK
+	call ENEMY_WALK
+	#
 NOT_YET:
-	beqz a6,POLL_LOOP
-	# Testa se algo foi digitado, se não, retorna ao loop		
+	beqz a6,POLL_LOOP	# Testa se algo foi digitado, se não, retorna ao loop		
 	li s11,MMIO_add
-	lw s11, (s11)			
-	# Tecla capturada em s11
-	jal LOLO_WALK
-	# Executa a movimentação do LOLO
+	lw s11, (s11)		# Tecla capturada em s11
+	call LOLO_WALK 		# Executa a movimentação do LOLO
 	j POLL_LOOP	
 
-ZEROU:
+FINAL_STAGE_END:
 	ending()
 
 #############################
@@ -88,14 +83,14 @@ mv t0,a1
 la s0,stage_one
 jal IMPRIME
 li t1,0
-SAVEW(t1, DOOR_STATE)
-PRINT_DOOR()
-SWITCH_FRAME()
+savew(t1, DOOR_STATE)
+print_door()
+switch_frame()
 frame_address(a1)
 mv t0,a1	
 la s0,stage_one
 jal IMPRIME
-PRINT_DOOR()
+print_door()
 mark_as_block(4,122,36 )
 mark_as_block(2,218,36 )
 mark_as_block(3,138,52 )
@@ -113,20 +108,20 @@ j GAMEPLAY
 #############################
 RENDER_STAGE_TWO:
 li t1,2
-SAVEW(t1,CURRENT_LEVEL)
+savew(t1,CURRENT_LEVEL)
 frame_address(a1)
 mv t0,a1	
 la s0,stage_two
 jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
+print_door()
+switch_frame()
 frame_address(a1)
 mv t0,a1	
 la s0,stage_two
 jal IMPRIME
-PRINT_DOOR()
+print_door()
 li t3, 3
-SAVEW(t3, KEY_COUNTER)
+savew(t3, KEY_COUNTER)
 mark_as_block(4,122,36)
 mark_as_block(2,218,36)
 mark_as_block(3,138,52)
@@ -148,20 +143,20 @@ j GAMEPLAY
 ##############################
 RENDER_STAGE_THREE:
 li t1,3
-SAVEW(t1,CURRENT_LEVEL)
+savew(t1,CURRENT_LEVEL)
 frame_address(a1)
 mv t0,a1	
 la s0,stage_three
 jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
+print_door()
+switch_frame()
 frame_address(a1)
 mv t0,a1	
 la s0,stage_three
 jal IMPRIME
-PRINT_DOOR()
+print_door()
 li t3, 2
-SAVEW(t3, KEY_COUNTER)
+savew(t3, KEY_COUNTER)
 mark_as_block(1,90,52)
 mark_as_block(1,106,52)
 mark_as_block(1,90,68)
@@ -198,20 +193,20 @@ j GAMEPLAY
 ###########################
 RENDER_STAGE_FOUR:
 li t1,4
-SAVEW(t1,CURRENT_LEVEL)
+savew(t1,CURRENT_LEVEL)
 frame_address(a1)
 mv t0,a1	
 la s0,stage_four
 jal IMPRIME
-PRINT_DOOR()
-SWITCH_FRAME()
+print_door()
+switch_frame()
 frame_address(a1)
 mv t0,a1	
 la s0,stage_four
 jal IMPRIME
-PRINT_DOOR()
+print_door()
 li t3, 1
-SAVEW(t3, KEY_COUNTER)
+savew(t3, KEY_COUNTER)
 mark_as_mortal(90,52)
 mark_as_mortal(106,52)
 mark_as_mortal(122,52)
@@ -270,14 +265,14 @@ j GAMEPLAY
 ###########################
 RENDER_FINAL_STAGE:
 	li t1,1
-	SAVEW(t1,LIFE_COUNTER)
+	savew(t1,LIFE_COUNTER)
 	li t1,5
-	SAVEW(t1,CURRENT_LEVEL)
+	savew(t1,CURRENT_LEVEL)
 	frame_address(a1)
 	mv t0,a1	
 	la s0,final_stage
 	jal IMPRIME
-	SWITCH_FRAME()
+	switch_frame()
 	frame_address(a1)
 	mv t0,a1	
 	la s0,final_stage
@@ -285,8 +280,8 @@ RENDER_FINAL_STAGE:
 	mark_as_block(11,74,100)
 	li t1,154
 	li t2,148
-	SAVEW(t1,LOLO_POSX)
-	SAVEW(t2,LOLO_POSY)
+	savew(t1,LOLO_POSX)
+	savew(t2,LOLO_POSY)
 	set_enemy(0,90,116,16,54,66)
 	set_enemy(1,218,132,-16,65,77)
 	set_enemy(2,90,148,16,76,88)

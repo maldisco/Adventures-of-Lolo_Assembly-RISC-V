@@ -44,7 +44,7 @@ MARK_AS_BLOCK:
 	mv t1, a2
 	mv t2, a3
 	mv s1, a1
-	CALCULATE_BLOCK(t1,t2)		# Bloco (x,y) = T1
+	calculate_block(t1,t2)		# Bloco (x,y) = T1
 	la t2,WALKABLE_BLOCKS
 	add t2,t2,t1
 	li t3,1

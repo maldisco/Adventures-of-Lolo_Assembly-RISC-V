@@ -12,38 +12,38 @@ LOLO_WALK:
 	j POLL_LOOP
 	
 LOLO_WALK_UP:
-	LOADW(t3,LOLO_POSX)
-	LOADW(t2,LOLO_POSY)
-	CALCULATE_BLOCK(t3,t2)
+	loadw(t3,LOLO_POSX)
+	loadw(t2,LOLO_POSY)
+	calculate_block(t3,t2)
 	# Calcula o bloco atual de lolo (vai ser apagado)
 	la t2, BRIDGE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
 	beqz t3, LWU_NOT_BRIDGE
-	PRINT_DYN_IMG(bridge,LOLO_POSX,LOLO_POSY)
+	render_sprite(bridge,LOLO_POSX,LOLO_POSY)
 	# Se é uma ponte, imprime uma ponte
 	j LWU_IS_BRIDGE
 LWU_NOT_BRIDGE:
-	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
+	render_sprite(tijolo,LOLO_POSX,LOLO_POSY)
 	# Se é um tijolo, imprime um tijolo
 LWU_IS_BRIDGE:						
-	SWITCH_FRAME()			
-	LOADW(a1,LOLO_POSY)
+	switch_frame()			
+	loadw(a1,LOLO_POSY)
 	addi a1,a1,-16
 	# Início teste 'é uma porta'
 	li t1, DOOR_POSX
 	li t2, DOOR_POSY
 	bne t2,a1,LWU_CONTINUE
-	LOADW( t3,LOLO_POSX )
+	loadw( t3,LOLO_POSX )
 	bne t3,t1,LWU_CONTINUE
 	# Início teste 'a porta está aberta'
-	LOADW(t1,DOOR_STATE)
+	loadw(t1,DOOR_STATE)
 	bnez t1, LWU_INVALID
 	# Fim teste 'a porta está aberta'
-	SAVEW( a1,LOLO_POSY )
-	PRINT_DYN_IMG(lolo_coca, LOLO_POSX, LOLO_POSY)
+	savew( a1,LOLO_POSY )
+	render_sprite(lolo_coca, LOLO_POSX, LOLO_POSY)
 	li t3, FRAME_SELECT
-	LOADW(t1,CURRENT_FRAME)			
+	loadw(t1,CURRENT_FRAME)			
 	sw t1,(t3)
 	# Se é uma porta, e está aberta, fase finalizada				
 	finished_level()
@@ -54,8 +54,8 @@ LWU_CONTINUE:
 	blt a1,t2,LWU_INVALID
 	# Fim teste 'está no mapa'
 	# Início teste 'é um bloco andável'
-	LOADW( t3,LOLO_POSX )
-	CALCULATE_BLOCK(t3,a1)
+	loadw( t3,LOLO_POSX )
+	calculate_block(t3,a1)
 	# Início teste 'é um bloco mortal'
 	jal IS_MORTAL_BLOCK
 	# Fim teste 'é um bloco mortal'
@@ -67,14 +67,14 @@ LWU_NOT_MORTAL:
 	beqz t3, LWU_NOT_KEY
 	li t3,0
 	sb t3,(t2)
-	LOADW(t2,KEY_COUNTER)
+	loadw(t2,KEY_COUNTER)
 	addi t2,t2,-1	
-	SAVEW(t2,KEY_COUNTER)
+	savew(t2,KEY_COUNTER)
 	door_refresh()
-	LOADW(a1,LOLO_POSY)
+	loadw(a1,LOLO_POSY)
 	addi a1,a1,-16
-	SAVEW(a1,LOLO_POSY)
-	ERASE_BLOCK()		
+	savew(a1,LOLO_POSY)
+	erase_block()		
 	j LWU_IS_KEY	
 	# Fim teste 'é um bloco-chave'
 LWU_NOT_KEY:
@@ -83,38 +83,38 @@ LWU_NOT_KEY:
 	lb t1,(t2)
 	bgt t1,zero, LWU_INVALID
 	# WALKABLE BLOCK TEST END
-	SAVEW(a1,LOLO_POSY)			
+	savew(a1,LOLO_POSY)			
 LWU_IS_KEY:
 LWU_INVALID:
 	jal COLISION_TEST
-	PRINT_DYN_IMG(lolo_up_1,LOLO_POSX,LOLO_POSY)						
+	render_sprite(lolo_up_1,LOLO_POSX,LOLO_POSY)						
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	loadw( t1,CURRENT_FRAME )			
 	sw t1,(t3)				
 	j POLL_LOOP
 LOLO_WALK_DOWN:
-	LOADW(t3,LOLO_POSX)
-	LOADW(t2,LOLO_POSY)
-	CALCULATE_BLOCK(t3,t2)
+	loadw(t3,LOLO_POSX)
+	loadw(t2,LOLO_POSY)
+	calculate_block(t3,t2)
 	la t2, BRIDGE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
 	beqz t3, LWD_NOT_BRIDGE
-	PRINT_DYN_IMG(bridge,LOLO_POSX,LOLO_POSY)
+	render_sprite(bridge,LOLO_POSX,LOLO_POSY)
 	j LWD_IS_BRIDGE
 LWD_NOT_BRIDGE:
-	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
+	render_sprite(tijolo,LOLO_POSX,LOLO_POSY)
 LWD_IS_BRIDGE:
-	SWITCH_FRAME()			
-	LOADW(a1,LOLO_POSY)
+	switch_frame()			
+	loadw(a1,LOLO_POSY)
 	addi a1,a1,16
 	# Início teste 'está no mapa'
 	li t2, MAP_LOWER_EDGE
 	bgt a1,t2,LWD_INVALID
 	# Fim teste 'está no mapa'
 	# Início teste 'é um bloco andável'
-	LOADW( t3,LOLO_POSX )
-	CALCULATE_BLOCK( t3,a1 )
+	loadw( t3,LOLO_POSX )
+	calculate_block( t3,a1 )
 	# Início teste 'é um bloco mortal'
 	jal IS_MORTAL_BLOCK
 	# Fim teste 'é um bloco mortal'
@@ -126,14 +126,14 @@ LWD_NOT_MORTAL:
 	beqz t3, LWD_NOT_KEY
 	li t3,0
 	sb t3,(t2)
-	LOADW(t2,KEY_COUNTER)
+	loadw(t2,KEY_COUNTER)
 	addi t2,t2,-1
-	SAVEW(t2,KEY_COUNTER)
+	savew(t2,KEY_COUNTER)
 	door_refresh()
-	LOADW(a1,LOLO_POSY)
+	loadw(a1,LOLO_POSY)
 	addi a1,a1,16
-	SAVEW(a1,LOLO_POSY)
-	ERASE_BLOCK()		
+	savew(a1,LOLO_POSY)
+	erase_block()		
 	j LWD_IS_KEY	
 	# Fim teste 'é um bloco-chave'
 LWD_NOT_KEY:
@@ -142,39 +142,39 @@ LWD_NOT_KEY:
 	lb t1,(t2)
 	bgt t1,zero, LWD_INVALID
 	# Fim teste 'é um bloco andável'
-	SAVEW(a1,LOLO_POSY)			
+	savew(a1,LOLO_POSY)			
 LWD_IS_KEY:
 LWD_INVALID:
 	jal COLISION_TEST
-	PRINT_DYN_IMG( lolo_down_1, LOLO_POSX, LOLO_POSY)
+	render_sprite( lolo_down_1, LOLO_POSX, LOLO_POSY)
 						
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	loadw( t1,CURRENT_FRAME )			
 	sw t1,(t3)				
 	j POLL_LOOP
 LOLO_WALK_RIGHT:
-	LOADW(t3,LOLO_POSX)
-	LOADW(t2,LOLO_POSY)
-	CALCULATE_BLOCK(t3,t2)
+	loadw(t3,LOLO_POSX)
+	loadw(t2,LOLO_POSY)
+	calculate_block(t3,t2)
 	la t2, BRIDGE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
 	beqz t3, LWR_NOT_BRIDGE
-	PRINT_DYN_IMG(bridge,LOLO_POSX,LOLO_POSY)
+	render_sprite(bridge,LOLO_POSX,LOLO_POSY)
 	j LWR_IS_BRIDGE
 LWR_NOT_BRIDGE:
-	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
+	render_sprite(tijolo,LOLO_POSX,LOLO_POSY)
 LWR_IS_BRIDGE:						
-	SWITCH_FRAME()					
-	LOADW( a1,LOLO_POSX )
+	switch_frame()					
+	loadw( a1,LOLO_POSX )
 	addi a1,a1,16
 	# Início teste 'está no mapa'
 	li t2, MAP_RIGHT_EDGE
 	bgt a1,t2,LWR_INVALID
 	# Fim teste 'está no mapa'
 	# Início teste 'é um bloco andável'
-	LOADW( t3,LOLO_POSY )
-	CALCULATE_BLOCK( a1,t3 )
+	loadw( t3,LOLO_POSY )
+	calculate_block( a1,t3 )
 	# Início teste 'é um bloco mortal'
 	jal IS_MORTAL_BLOCK
 	# Fim teste 'é um bloco mortal'
@@ -186,14 +186,14 @@ LWR_NOT_MORTAL:
 	beqz t3, LWR_NOT_KEY
 	li t3,0
 	sb t3,(t2)
-	LOADW(t2,KEY_COUNTER)
+	loadw(t2,KEY_COUNTER)
 	addi t2,t2,-1
-	SAVEW(t2,KEY_COUNTER)
+	savew(t2,KEY_COUNTER)
 	door_refresh()
-	LOADW(a1,LOLO_POSX)
+	loadw(a1,LOLO_POSX)
 	addi a1,a1,16
-	SAVEW(a1,LOLO_POSX)
-	ERASE_BLOCK()		
+	savew(a1,LOLO_POSX)
+	erase_block()		
 	j LWR_IS_KEY	
 	# Início teste 'é um bloco chave'
 LWR_NOT_KEY:
@@ -202,40 +202,40 @@ LWR_NOT_KEY:
 	lb t1,(t2)
 	bgt t1,zero, LWR_INVALID
 	# Fim teste 'é um bloco andável'
-	SAVEW( a1,LOLO_POSX )				
+	savew( a1,LOLO_POSX )				
 LWR_IS_KEY:
 LWR_INVALID:
 	jal COLISION_TEST
-	PRINT_DYN_IMG( lolo_right_1, LOLO_POSX, LOLO_POSY)
+	render_sprite( lolo_right_1, LOLO_POSX, LOLO_POSY)
 						
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	loadw( t1,CURRENT_FRAME )			
 	sw t1,(t3)				
 	j POLL_LOOP
 LOLO_WALK_LEFT:
-	LOADW(t3,LOLO_POSX)
-	LOADW(t2,LOLO_POSY)
-	CALCULATE_BLOCK(t3,t2)
+	loadw(t3,LOLO_POSX)
+	loadw(t2,LOLO_POSY)
+	calculate_block(t3,t2)
 	la t2, BRIDGE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
 	beqz t3, LWL_NOT_BRIDGE
-	PRINT_DYN_IMG(bridge,LOLO_POSX,LOLO_POSY)
+	render_sprite(bridge,LOLO_POSX,LOLO_POSY)
 	j LWL_IS_BRIDGE
 LWL_NOT_BRIDGE:
-	PRINT_DYN_IMG(tijolo,LOLO_POSX,LOLO_POSY)
+	render_sprite(tijolo,LOLO_POSX,LOLO_POSY)
 LWL_IS_BRIDGE:
 						
-	SWITCH_FRAME()			
-	LOADW( a1,LOLO_POSX )
+	switch_frame()			
+	loadw( a1,LOLO_POSX )
 	addi a1,a1,-16
 	# Início teste 'está no mapa'
 	li t2, MAP_LEFT_EDGE
 	blt a1,t2, LWL_INVALID
 	# Fim teste 'está no mapa'
 	# Início teste 'é um bloco andável'
-	LOADW( t3,LOLO_POSY )
-	CALCULATE_BLOCK(a1,t3)
+	loadw( t3,LOLO_POSY )
+	calculate_block(a1,t3)
 	# Início teste 'é um bloco mortal'
 	jal IS_MORTAL_BLOCK
 	# Fim teste 'é um bloco mortal'
@@ -247,14 +247,14 @@ LWL_NOT_MORTAL:
 	beqz t3, LWL_NOT_KEY
 	li t3,0
 	sb t3,(t2)
-	LOADW(t2,KEY_COUNTER)
+	loadw(t2,KEY_COUNTER)
 	addi t2,t2,-1
-	SAVEW(t2,KEY_COUNTER)
+	savew(t2,KEY_COUNTER)
 	door_refresh()
-	LOADW(a1,LOLO_POSX)
+	loadw(a1,LOLO_POSX)
 	addi a1,a1,-16
-	SAVEW(a1,LOLO_POSX)
-	ERASE_BLOCK()		
+	savew(a1,LOLO_POSX)
+	erase_block()		
 	j LWL_IS_KEY	
 	# Fim teste 'é um bloco-chave'
 LWL_NOT_KEY:
@@ -263,13 +263,13 @@ LWL_NOT_KEY:
 	lb t1,(t2)
 	bgt t1,zero, LWL_INVALID
 	# Fim teste 'é um bloco andável'
-	SAVEW(a1,LOLO_POSX)			
+	savew(a1,LOLO_POSX)			
 LWL_IS_KEY:
 LWL_INVALID:
 	jal COLISION_TEST
-	PRINT_DYN_IMG( lolo_left_1, LOLO_POSX, LOLO_POSY)
+	render_sprite( lolo_left_1, LOLO_POSX, LOLO_POSY)
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	loadw( t1,CURRENT_FRAME )			
 	sw t1,(t3)				
 	j POLL_LOOP
 	
@@ -281,21 +281,21 @@ IS_MORTAL_BLOCK:
 	add t2,t2,t1
 	lb t3,(t2)
 	beqz t3, NOT_MORTAL
-	LOADW(t3,LIFE_COUNTER)
+	loadw(t3,LIFE_COUNTER)
 	addi t3,t3,-1
 	beqz t3, DEAD
-	SAVEW(t3,LIFE_COUNTER)
+	savew(t3,LIFE_COUNTER)
 	li t1,74
 	li t2,36
-	SAVEW(t1,LOLO_POSX)
-	SAVEW(t2,LOLO_POSY)
-	PRINT_DYN_IMG(lolo_pisca,LOLO_POSX,LOLO_POSY)
+	savew(t1,LOLO_POSX)
+	savew(t2,LOLO_POSY)
+	render_sprite(lolo_pisca,LOLO_POSX,LOLO_POSY)
 	li t3, FRAME_SELECT
-	LOADW( t1,CURRENT_FRAME )			
+	loadw( t1,CURRENT_FRAME )			
 	sw t1,(t3)
 	j POLL_LOOP
 DEAD:
-	SWITCH_FRAME()
+	switch_frame()
 	you_died()
 NOT_MORTAL:
 	ret
