@@ -14,6 +14,13 @@ ENEMY_INITIAL_BLOCK:	.word 0,0,0,0,0,0
 CURRENT_ENEMY_F_BLOCK:	.word 0
 ENEMY_FINAL_BLOCK:	.word 0,0,0,0,0,0
 
+SHOT_POSX:		.word 0
+SHOT_INITIAL_POSX:	.word 0
+SHOT_POSY:		.word 0
+SHOT_SPEED:		.word 0 
+SHOT_FINAL_BLOCK:	.word 0
+SHOOTING_ENEMY:		.word 0		# 0 = not shooting, 1 = shooting
+
 .text
 ENEMY_WALK:
 #	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
@@ -142,4 +149,23 @@ ENEMIES_WALK:
 		addi t5,t5,1
 		j EWS_LOOP
 	EWS_DONE:
+	j POLL_LOOP
+
+################################################################
+# Renderiza um tiro que vai da posição (x,y) até o bloco final #
+################################################################
+ENEMY_SHOT:
+	render_abs_sprite(tijolo,SHOT_POSX,SHOT_POSY)
+	loadw(s1,SHOT_POSX)
+	loadw(s2,SHOT_POSY)
+	loadw(s3,SHOT_SPEED)
+	loadw(s4,SHOT_FINAL_BLOCK)
+	add s1,s1,s3
+	calculate_block(s1,s2)
+	ble t1,s4,ES_CONTINUE
+		loadw(s1,SHOT_INITIAL_POSX)
+		savew(s1,SHOT_POSX)
+	ES_CONTINUE:
+	savew(s1,SHOT_POSX)
+	render_abs_sprite(enemy_shot,SHOT_POSX,SHOT_POSY)
 	j POLL_LOOP

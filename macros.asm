@@ -34,6 +34,7 @@ A_VAGUE_HOPE: 72,687,74,687,71,687,72,687,69,2748,76,687,77,687,72,687,74,687,76
 HIT: .word 33,444
 FOUND_KEY: .word 72,544
 # PTR
+TEMP:			.word 0 		# ações temporarias que necessitam de um buffer
 CURRENT_FRAME:		.word 0
 WALKABLE_BLOCKS:	.space 121		# vetor de 121 elementos, 0 = walkable, 1 = unwalkable
 DOOR_STATE:		.word 1 		# 0 -> open, 1 -> closed
@@ -186,6 +187,22 @@ add t0,t0,t1
 li t1,1
 sb t1,(t0)
 .end_macro
+######################################################
+# Marca o bloco nas coordenadas x,y como empurrável  #
+######################################################
+.macro mark_as_pushable(%x, %y)
+li t3, %y
+li t2, %x
+calculate_block(t2,t3)
+# t1 = block
+la t0, PUSHABLE_BLOCKS
+la t2, WALKABLE_BLOCKS
+add t0,t0,t1
+add t2,t2,t1
+li t1,1
+sb t1,(t0)
+sb t1,(t2)
+.end_macro
 ################################################
 # Apaga o bloco nas coordenadas atuais de Lolo #
 ################################################
@@ -243,6 +260,23 @@ li t1,%final_block
 sw t1,(t3)
 savew(t1,CURRENT_ENEMY_F_BLOCK)
 render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
+.end_macro
+#####################################################
+# Configura um inimigo que atira nas posições X e Y #
+# - As informações serão utilizadas para efetuar o  #
+# disparo					    #			       
+#####################################################
+.macro set_shooting_enemy(%posx,%posy,%speed,%final_block)
+li t1,%posx
+savew(t1,SHOT_POSX)
+li t1,%posx
+savew(t1,SHOT_INITIAL_POSX)
+li t1,%posy
+savew(t1,SHOT_POSY)
+li t1,%speed
+savew(t1,SHOT_SPEED)
+li t1,%final_block
+savew(t1,SHOT_FINAL_BLOCK)
 .end_macro
 #############################
 # Apenas chama a soundtrack #
@@ -438,8 +472,10 @@ ecall
 .include "./sprites/enemies/enemy.data"
 .include "./sprites/enemies/enemy_left.data"
 .include "./sprites/enemies/enemy_right.data"
+.include "./sprites/enemies/enemy_shot.data"
 .include "./sprites/blocos/tijolo.data"
 .include "./sprites/blocos/bridge.data"
+.include "./sprites/blocos/pblock.data"
 .include "./sprites/blocos/score_one.data"
 .include "./sprites/blocos/score_two.data"
 .include "./sprites/blocos/score_three.data"

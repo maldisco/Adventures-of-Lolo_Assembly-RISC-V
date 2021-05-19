@@ -14,7 +14,7 @@
 # [X] Efeitos sonoros
 # [X] Animação do inimigo
 # [] Baús
-# [] Objetos dinamicos
+# [X] Objetos dinamicos
 # [] Refazer as fases (com oq eu tiver conseguido implementar acima)
 
 ###########################

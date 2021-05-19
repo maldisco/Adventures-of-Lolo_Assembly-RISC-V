@@ -40,34 +40,44 @@ GAME:
 	POLL_LOOP:				
 		lb a6,(s0) # a6 = estado do teclado	
 		loadw(t0,CURRENT_LEVEL)
-		li t1,4
-		blt t0,t1,NOT_YET
-			li a7,30
-			ecall # Retorna o horário atual
-			mv a1,a0
-			loadw(t0,CLOCK)
-			sub a0,a0,t0 # a0 = horário atual - inicial
-			li t0,150
-			ble a0,t0,NOT_YET # se a0 maior que 150 milisegundos, executa uma ação
-			savew(a1,CLOCK)	
-			loadw(t1,CURRENT_LEVEL)
+		li a7,30
+		ecall # Retorna o horário atual
+		mv a1,a0
+		loadw(t0,CLOCK)
+		sub a0,a0,t0 # a0 = horário atual - inicial
+		li t0,150
+		ble a0,t0,NOT_YET # se a0 maior que 150 milisegundos, executa uma ação
+		savew(a1,CLOCK)	
+		loadw(t1,CURRENT_LEVEL)
+		li t2,5
+		beq t1,t2,STAGE_FIVE_ACTIONS
 			li t2,4
 			beq t1,t2,STAGE_FOUR_ACTIONS
-				# Fase 5 -> ações
-				loadw(t1,CLOCK_2)
-				sub a1,a1,t1
-				li t2,20000 # Se passaram 20 segundos desde o início da fase, passou de fase
-				bgt a1,t2,FINAL_STAGE_END
-				call ENEMIES_WALK
+				li t2,1
+				beq t1,t2,STAGE_ONE_ACTIONS
+					j NOT_YET
+				STAGE_ONE_ACTIONS:
+					loadw(t1,SHOOTING_ENEMY)
+					beqz t1,SOA_JUMP
+						call ENEMY_SHOT
+					SOA_JUMP:	
+					j NOT_YET				
 			STAGE_FOUR_ACTIONS:
-				# Fase 4 -> ações
-				call ENEMY_WALK
+			# Fase 4 -> ações
+			call ENEMY_WALK
+		STAGE_FIVE_ACTIONS:
+			# Fase 5 -> ações
+			loadw(t1,CLOCK_2)
+			sub a1,a1,t1
+			li t2,20000 # Se passaram 20 segundos desde o início da fase, passou de fase
+			bgt a1,t2,FINAL_STAGE_END
+			call ENEMIES_WALK
 		NOT_YET:
-			beqz a6,POLL_LOOP	# Testa se algo foi digitado, se não, retorna ao loop		
-			li s11,MMIO_add
-			lw s11, (s11)		# Tecla capturada em s11
-			call LOLO_WALK 		# Executa a movimentação do LOLO
-			j POLL_LOOP	
+		beqz a6,POLL_LOOP	# Testa se algo foi digitado, se não, retorna ao loop		
+		li s11,MMIO_add
+		lw s11, (s11)		# Tecla capturada em s11
+		call LOLO_WALK 		# Executa a movimentação do LOLO
+		j POLL_LOOP	
 	
 	FINAL_STAGE_END:
 		ending()

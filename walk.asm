@@ -33,6 +33,10 @@ LOLO_WALK_UP:
 			savew(a1,LOLO_POSY)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
 	LWU_INVALID:
+	jal IS_PUSHABLE_BLOCK
+	beqz t3,LWU_INVALID_2
+		jal PUSHABLE_UP
+	LWU_INVALID_2:
 	jal COLISION_TEST
 	render_sprite(lolo_up_1,LOLO_POSX,LOLO_POSY)						
 	frame_refresh()				
@@ -55,6 +59,10 @@ LOLO_WALK_DOWN:
 			savew(a1,LOLO_POSY)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
 	LWD_INVALID:
+	jal IS_PUSHABLE_BLOCK
+	beqz t3,LWD_INVALID_2
+		jal PUSHABLE_DOWN
+	LWD_INVALID_2:
 	jal COLISION_TEST			# Testa colisão com inimigo
 	render_sprite( lolo_down_1, LOLO_POSX, LOLO_POSY)					
 	frame_refresh()				
@@ -77,6 +85,10 @@ LOLO_WALK_RIGHT:
 			savew(a1,LOLO_POSX)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
 	LWR_INVALID:
+	jal IS_PUSHABLE_BLOCK
+	beqz t3,LWR_INVALID_2
+		jal PUSHABLE_RIGHT
+	LWR_INVALID_2:
 	jal COLISION_TEST			# Testa colisão com inimigo
 	render_sprite(lolo_right_1, LOLO_POSX, LOLO_POSY)						
 	frame_refresh()					
@@ -99,6 +111,10 @@ LOLO_WALK_LEFT:
 			savew(a1,LOLO_POSX)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
 	LWL_INVALID:
+	jal IS_PUSHABLE_BLOCK
+	beqz t3,LWL_INVALID_2
+		jal PUSHABLE_LEFT
+	LWL_INVALID_2:
 	jal COLISION_TEST
 	render_sprite(lolo_left_1, LOLO_POSX, LOLO_POSY)
 	frame_refresh()					
@@ -151,6 +167,205 @@ IS_KEY_BLOCK:
 	IKB_INVALID:
 	ret
 
+#####################################
+# Verifica se é um bloco empurrável #
+#####################################
+IS_PUSHABLE_BLOCK:
+	la t2, PUSHABLE_BLOCKS
+	add t2,t2,t1
+	lb t3,(t2)
+	beqz t3, IPB_INVALID	# Testa se o bloco está marcado como KEY no vetor KEY_BLOCKS
+		li t3,1
+		ret	
+	IPB_INVALID:
+	li t3,0
+	ret
+	
+	###############################################
+	# Empurra para cima,baixo,direita ou esquerda #
+	###############################################
+	PUSHABLE_UP:
+	# a1 vem com a posição Y do lolo atualizada (depois de andar)
+	loadw(a2,LOLO_POSX)
+	addi a3,a1,-16			# Calcula mais um passo pra cima
+	calculate_block(a2,a3)		# simulando um passo do bloco empurrável
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	lb t1,(t2)
+	beqz t1, PU_VALID		# Se o passo do bloco empurrável entrar em uma parede
+					# ou em outro bloco marcado como não andável
+		calculate_block(a2,a1)	# Retorna ao loop 'lolo_walk' marcando o bloco empurrável
+		la t2,WALKABLE_BLOCKS	# como um bloco não andável
+		add t2,t2,t1
+		li t1,1
+		sb t1,(t2)
+		ret
+	PU_VALID:			# Se não entrar em uma parede, executa as seguintes ações:
+	savew(a1,LOLO_POSY)		# Salva a posição atualizada do Lolo
+	
+	loadw(a1,LOLO_POSX)		
+	loadw(a2,LOLO_POSY)	
+	calculate_block(a1,a2)		# Reseta as marcas do bloco para onde Lolo vai andar
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,0
+	sb t1,(t2)
+	sb t1,(t3)
+	addi a2,a2,-16			# Simula um passo do bloco empurrável
+	savew(a2,TEMP)
+	mv s7,ra
+	render_abs_sprite(tijolo,LOLO_POSX,LOLO_POSY)	# Renderiza um tijolo aonde o bloco empurrável estava
+	render_abs_sprite(pblock,LOLO_POSX,TEMP)	# Renderiza um bloco empurrável na proxima posição
+	loadw(a1,LOLO_POSX)
+	loadw(a2,TEMP)
+	calculate_block(a1,a2)		# Calcula o bloco em que o bloco empurrável está agora
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS		# Marca este bloco como empurrável E não andável
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,1
+	sb t1,(t2)
+	sb t1,(t3)	
+	mv ra,s7
+	ret				# Retorna ao 'lolo_walk'
+	
+	PUSHABLE_DOWN:
+	loadw(a2,LOLO_POSX)
+	addi a3,a1,16
+	calculate_block(a2,a3)
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	lb t1,(t2)
+	beqz t1, PD_VALID
+		calculate_block(a2,a1)
+		la t2,WALKABLE_BLOCKS
+		add t2,t2,t1
+		li t1,1
+		sb t1,(t2)
+		ret
+	PD_VALID:
+	savew(a1,LOLO_POSY)
+	
+	loadw(a1,LOLO_POSX)
+	loadw(a2,LOLO_POSY)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,0
+	sb t1,(t2)
+	sb t1,(t3)
+	addi a2,a2,16
+	savew(a2,TEMP)
+	mv s7,ra
+	render_abs_sprite(tijolo,LOLO_POSX,LOLO_POSY)
+	render_abs_sprite(pblock,LOLO_POSX,TEMP)
+	loadw(a1,LOLO_POSX)
+	loadw(a2,TEMP)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,1
+	sb t1,(t2)
+	sb t1,(t3)	
+	mv ra,s7
+	ret
+	
+	PUSHABLE_RIGHT:
+	loadw(a2,LOLO_POSY)
+	addi a3,a1,16
+	calculate_block(a3,a2)
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	lb t1,(t2)
+	beqz t1, PR_VALID
+		calculate_block(a1,a2)
+		la t2,WALKABLE_BLOCKS
+		add t2,t2,t1
+		li t1,1
+		sb t1,(t2)
+		ret
+	PR_VALID:
+	savew(a1,LOLO_POSX)
+	
+	loadw(a1,LOLO_POSX)
+	loadw(a2,LOLO_POSY)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,0
+	sb t1,(t2)
+	sb t1,(t3)
+	addi a1,a1,16
+	savew(a1,TEMP)
+	mv s7,ra
+	render_abs_sprite(tijolo,LOLO_POSX,LOLO_POSY)
+	render_abs_sprite(pblock,TEMP,LOLO_POSY)
+	loadw(a1,TEMP)
+	loadw(a2,LOLO_POSY)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,1
+	sb t1,(t2)
+	sb t1,(t3)	
+	mv ra,s7
+	ret
+	
+	PUSHABLE_LEFT:
+	loadw(a2,LOLO_POSY)
+	addi a3,a1,-16
+	calculate_block(a3,a2)
+	la t2,WALKABLE_BLOCKS
+	add t2,t2,t1
+	lb t1,(t2)
+	beqz t1, PL_VALID
+		calculate_block(a1,a2)
+		la t2,WALKABLE_BLOCKS
+		add t2,t2,t1
+		li t1,1
+		sb t1,(t2)
+		ret
+	PL_VALID:
+	savew(a1,LOLO_POSX)
+	
+	loadw(a1,LOLO_POSX)
+	loadw(a2,LOLO_POSY)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,0
+	sb t1,(t2)
+	sb t1,(t3)
+	addi a1,a1,-16
+	savew(a1,TEMP)
+	mv s7,ra
+	render_abs_sprite(tijolo,LOLO_POSX,LOLO_POSY)
+	render_abs_sprite(pblock,TEMP,LOLO_POSY)
+	loadw(a1,TEMP)
+	loadw(a2,LOLO_POSY)
+	calculate_block(a1,a2)
+	la t2,PUSHABLE_BLOCKS
+	la t3,WALKABLE_BLOCKS
+	add t2,t2,t1
+	add t3,t3,t1
+	li t1,1
+	sb t1,(t2)
+	sb t1,(t3)	
+	mv ra,s7
+	ret
+
 #######################
 # Apaga o bloco atual #
 #######################	
@@ -164,11 +379,11 @@ ERASE_CURRENT_BLOCK:
 	lb t3,(t2)
 	mv a7,ra
 	beqz t3, LWU_NOT_BRIDGE  # Testa se deve apagar com ponte
-		render_sprite(bridge,LOLO_POSX,LOLO_POSY)
+		render_abs_sprite(bridge,LOLO_POSX,LOLO_POSY)
 		mv ra,a7
 		ret
 	LWU_NOT_BRIDGE:
-	render_sprite(tijolo,LOLO_POSX,LOLO_POSY)
+	render_abs_sprite(tijolo,LOLO_POSX,LOLO_POSY)
 	mv ra,a7
 	ret
 
@@ -189,3 +404,4 @@ IS_DOOR:
 				finished_level()	
 	ID_FALSE:
 	ret
+
