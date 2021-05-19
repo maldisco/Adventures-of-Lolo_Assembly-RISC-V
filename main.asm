@@ -3,23 +3,19 @@
 .include "MACROSv21.s"
 .text
 
-# [] Refatorar
-# [] Contadores
-#	[] Vidas
-#	[] Chaves
+# [X] Refatorar
+# [X] Contadores
+#	[X] Vidas
 # [] Visual
 #	[] Mapa
 #	[] Inimigo
 #	[] Objetos
 # 	[] Lolo
-# [] Efeitos sonoros
-# [] Animação do inimigo
+# [X] Efeitos sonoros
+# [X] Animação do inimigo
 # [] Baús
 # [] Objetos dinamicos
 # [] Refazer as fases (com oq eu tiver conseguido implementar acima)
-
-
-
 
 ###########################
 #  Executa o menu inicial #

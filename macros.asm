@@ -31,7 +31,8 @@
 LAST_GOODBYE: 55,666,67,333,64,333,62,333,60,333,59,166,60,333,62,832,71,499,73,83,69,83,67,1332,57,666,67,333,64,333,62,333,60,333,62,166,64,333,59,832,62,666,62,333,60,333,59,333,60,333,55,666,67,666,62,1332,60,666,67,333,69,166,67,333,64,333,62,333,64,83,62,83,60,333,60,333,60,166,62,166,64,333,60,333,62,333,62,166,64,166,62,166,64,83,62,83,60,333,63,333,62,333,58,333,62,333,60,666,62,832,55,166,60,166,62,332,55,166,60,166,62,332,56,166,60,166,62,332,56,166,60,166,62,166,69,333,64,333,62,166,60,333,62,333,64,83,62,83,60,333,55,333,57,333,60,333,60,166,62,166,64,333,60,333,62,333,62,166,64,166,62,166,64,83,62,83,60,333,63,333,62,333,58,333,62,333,60,666,62,666
 LAST_GOODBYE_NUM:	.word 95
 A_VAGUE_HOPE: 72,687,74,687,71,687,72,687,69,2748,76,687,77,687,72,687,74,687,76,2748,74,687,76,687,71,687,74,687,72,1374,71,1374,69,458,71,458,72,458,74,687,72,687,71,2748,72,687,74,687,71,687,72,687,69,2748,76,687,77,687,72,687,74,687,76,2748,74,687,76,687,71,687,74,687,72,916,74,458,76,916,71,458,72,1374,72,687,74,687,71,1374,71,1374,69,5496,76,687,72,687,74,687,79,687,76,2290,76,229,80,229,79,687,81,229,79,458,78,458,76,458,74,458,71,458,76,2290,76,687,72,687,72,458,71,458,74,458
-
+HIT: .word 33,444
+FOUND_KEY: .word 72,544
 # PTR
 CURRENT_FRAME:		.word 0
 WALKABLE_BLOCKS:	.space 121		# vetor de 121 elementos, 0 = walkable, 1 = unwalkable
@@ -41,9 +42,12 @@ LIFE_COUNTER:		.word 3
 KEY_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 MORTAL_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 BRIDGE_BLOCKS:		.space 121		# vetor de 121 elementos, 0 = false, 1 = true
+PUSHABLE_BLOCKS:	.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 CURRENT_LEVEL:		.word 1
 CLOCK:			.word 0
 CLOCK_2:		.word 0
+SCORE_POSX:		.word 266
+SCORE_POSY:		.word 52
 ########################################
 # Imprime a porta (coordenadas padrão) #
 ########################################
@@ -111,9 +115,9 @@ li t2, 0xffffff80
 # ==========================================================
 jal PS_LOOP
 .end_macro
-##########################################################################
-# Imprime uma sprite 16x16 a partir de um endereço encontrado na memória #
-##########################################################################
+######################################################################
+# Renderiza a sprite assim como a macro acima, porém nas duas frames #
+######################################################################
 .macro render_abs_sprite(%sprite, %current_x, %current_y)
 # escolhe a frame aonde a sprite será desenhada
 li a1,FRAME_0
@@ -129,19 +133,19 @@ mv a2,a1
 li t1,4816		# 15x320 +16	
 add a2,a2,t1		# endereço final = endereço inicial + 16x320 + 16 	
 li t1,0x100000
-add a4,a1,t1
+add a4,a1,t1		# endereço inicial na frame 1 = endereço inical + 0x100000
 addi s1,s1,8		# chega ao .text
 li t1,0			# contador
 li t2, 0xffffff80
 # ==========================================================
-# a1 = endereço inicial 
-# a2 = endereço final
+# a1 = endereço inicial (frame 0)
+# a2 = endereço final (frame 1)
 # a3 = numero de pixels a serem pintados por linha
-# a4 = endereço na frame 1
+# a4 = endereço da frame 1
 # t1 = contador de pixels pintados
 # t2 = cor a ser substituida pelo transparente
 # ==========================================================
-jal PS_LOOP_TESTE
+jal PAS_LOOP
 .end_macro
 ################################################
 # Marca o bloco nas coordenadas x,y como chave #
@@ -245,6 +249,17 @@ render_sprite(enemy,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
 #############################
 .macro ost()
 jal SOUNDTRACK
+.end_macro
+###################
+# Efeitos sonoros #
+###################
+.macro sound(%label)
+li a2,7
+li a3,30
+la t0,%label
+lw a0,0(t0)
+lw a1,4(t0)
+call midiOut
 .end_macro
 #######################
 # Apenas chama o jogo #
@@ -421,8 +436,13 @@ ecall
 .include "./sprites/lolo_right/lolo_right_1.data"
 .include "./sprites/lolo_left/lolo_left_1.data"
 .include "./sprites/enemies/enemy.data"
+.include "./sprites/enemies/enemy_left.data"
+.include "./sprites/enemies/enemy_right.data"
 .include "./sprites/blocos/tijolo.data"
 .include "./sprites/blocos/bridge.data"
+.include "./sprites/blocos/score_one.data"
+.include "./sprites/blocos/score_two.data"
+.include "./sprites/blocos/score_three.data"
 .include "./sprites/porta/porta.data"
 .include "./sprites/porta/porta_fechada.data"
 .include "./sprites/bg/start_menu_1.data"

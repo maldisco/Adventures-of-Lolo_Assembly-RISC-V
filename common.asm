@@ -152,6 +152,29 @@ COLISION_TEST:
 	savew(t1,LOLO_POSX)
 	savew(t2,LOLO_POSY)
 	render_sprite(lolo_coca,LOLO_POSX,LOLO_POSY)
+	call SCORE_REFRESH
+	sound(HIT)
 	j CT_RETURN
-
-		
+	
+	
+#####################
+# Atualiza o placar #
+#####################
+SCORE_REFRESH:
+	loadw(a7,LIFE_COUNTER)
+	li t1,3
+	mv a6,ra
+	blt a7,t1,SR_JUMP
+		render_abs_sprite(score_three,SCORE_POSX,SCORE_POSY)
+		mv ra,a6
+		ret
+	SR_JUMP:
+	li t1,2
+	blt a7,t1,SR_JUMP_2
+		render_abs_sprite(score_two,SCORE_POSX,SCORE_POSY)
+		mv ra,a6
+		ret
+	SR_JUMP_2:
+	render_abs_sprite(score_one,SCORE_POSX,SCORE_POSY)
+	mv ra,a6
+	ret

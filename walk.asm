@@ -121,6 +121,8 @@ IS_MORTAL_BLOCK:
 			savew(t1,LOLO_POSX)
 			savew(t2,LOLO_POSY)
 			render_sprite(lolo_pisca,LOLO_POSX,LOLO_POSY)
+			call SCORE_REFRESH
+			sound(HIT)
 			frame_refresh()	
 			j POLL_LOOP
 		DEAD:
@@ -141,10 +143,11 @@ IS_KEY_BLOCK:
 		loadw(t2,KEY_COUNTER)
 		addi t2,t2,-1	
 		savew(t2,KEY_COUNTER)
-		mv a7,ra
+		mv s7,ra
 		door_refresh()
 		erase_block()
-		mv ra,a7	
+		sound(FOUND_KEY)
+		mv ra,s7	
 	IKB_INVALID:
 	ret
 

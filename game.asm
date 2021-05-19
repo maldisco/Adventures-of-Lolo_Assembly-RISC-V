@@ -103,7 +103,9 @@ RENDER_STAGE_ONE:
 	mark_as_block(8,74,164 )
 	mark_as_block(8,74,180 )
 	mark_as_block(8,74,196 )
-	mark_as_block(1,234,196 )	
+	mark_as_block(1,234,196 )
+	loadw(a0,LIFE_COUNTER)
+	render_abs_sprite(score_three,SCORE_POSX,SCORE_POSY)
 	j GAMEPLAY
 #############################
 # Renderiza a segunda fase  #
@@ -143,6 +145,7 @@ RENDER_STAGE_TWO:
 	mark_as_block(4,74,196)
 	mark_as_key(218,196)
 	mark_as_block(1,234,196)
+	call SCORE_REFRESH
 	j GAMEPLAY
 ##############################
 # Renderiza a terceira fase  #
@@ -197,6 +200,7 @@ RENDER_STAGE_THREE:
 	mark_as_block(1,202,180)
 	mark_as_key(234, 196)
 	mark_as_block(1,218,164)
+	call SCORE_REFRESH
 	j GAMEPLAY
 ###########################
 # Renderiza a quarta fase #
@@ -272,8 +276,8 @@ RENDER_STAGE_FOUR:
 	mark_as_mortal(186,132)
 	mark_as_key(154,116)
 	set_enemy(0,106,164,16,89,97)
+	call SCORE_REFRESH
 	j GAMEPLAY
-	
 ###########################
 # Renderiza a quinta fase #
 ###########################

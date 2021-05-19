@@ -59,26 +59,27 @@ MARK_AS_BLOCK:
 	MAB_LOOP_FORA:
 	ret	
 #################################
-# Loop imprime uma sprite 16x16 #		 
+# Loop imprime uma sprite 16x16 #
+# nas duas frames		#		 
 #################################
-PS_LOOP_TESTE: 	
-	bge a1,a2,PS_FORAT			# Se for o último endereço então sai do loop
-		bne t1,a3, PS_CONTINUAT		# Testa se 16 pixels foram pintados (1 linha)
+PAS_LOOP: 	
+	bge a1,a2,PAS_FORA			# Se for o último endereço então sai do loop
+		bne t1,a3, PAS_CONTINUA		# Testa se 16 pixels foram pintados (1 linha)
 			sub a1,a1,a3
 			sub a4,a4,a3
 			addi a1,a1,320		
 			addi a4,a4,320
 			li t1,0			# Desce para a próxima linha
-		PS_CONTINUAT:
+		PAS_CONTINUA:
 		lb t3, 0(s1)			# Carriga o byte da sprite
-		beq t3, t2, PS_PULAT		# Testa se o byte é da cor t6
+		beq t3, t2, PAS_PULA		# Testa se o byte é da cor t2
 			sb t3, 0(a1)		# Pinta o byte no endereço do BitMap
 			sb t3, 0(a4)
-		PS_PULAT:	
+		PAS_PULA:	
 		addi t1,t1,1
 		addi a1,a1,1 
 		addi a4,a4,1
 		addi s1,s1,1
-		j PS_LOOP_TESTE			
-	PS_FORAT:
+		j PAS_LOOP			
+	PAS_FORA:
 	ret
