@@ -37,27 +37,36 @@ IMPRIME:
 		j I_LOOP1		# volta a verificar
 	I_FIM:	
 	ret
-####################################
-# Marca as coordenadas como bloco  #
-####################################
-MARK_AS_BLOCK:
-	mv t1, a2
-	mv t2, a3
-	mv s1, a1
-	calculate_block(t1,t2)		# Bloco (x,y) = T1
-	la t2,WALKABLE_BLOCKS
-	add t2,t2,t1
-	li t3,1
-	li t4,0
-	mv t5,a0
-	MAB_LOOP:	
-	bge t4,t5,MAB_LOOP_FORA		# Loop de quantos blocos serão marcados
-		sb t3,(t2)		# Marca como unwalkable no vetor 'walkable blocks'
-		addi t4,t4,1
+##########################################
+# Marca N blocos na horizontal como algo #
+# N = a0				 #
+##########################################
+HORIZONTAL:
+	li t1,1
+	li t2,0
+	H_LOOP:	
+	bge t2,a0,H_LOOP_OUT		# Loop de quantos blocos serão marcados
+		sb t1,(a3)		# Marca como unwalkable no vetor 'walkable blocks'
 		addi t2,t2,1
-		j MAB_LOOP		
-	MAB_LOOP_FORA:
+		addi a3,a3,1
+		j H_LOOP		
+	H_LOOP_OUT:
 	ret	
+#######################################
+# Marca N blocos na verical como algo #
+# N = a0			      #
+#######################################
+VERTICAL:
+	li t1,1
+	li t2,0
+	V_LOOP:	
+	bge t2,a0,V_LOOP_OUT		# Loop de quantos blocos serão marcados
+		sb t1,(a3)		# Marca como unwalkable no vetor 'walkable blocks'
+		addi t2,t2,1
+		addi a3,a3,11
+		j V_LOOP		
+	V_LOOP_OUT:
+	ret
 #################################
 # Loop imprime uma sprite 16x16 #
 # nas duas frames		#		 

@@ -2,21 +2,6 @@
 .include "macros.asm"
 .include "MACROSv21.s"
 .text
-
-# [X] Refatorar
-# [X] Contadores
-#	[X] Vidas
-# [] Visual
-#	[] Mapa
-#	[] Inimigo
-#	[] Objetos
-# 	[] Lolo
-# [X] Efeitos sonoros
-# [X] Animação do inimigo
-# [] Baús
-# [X] Objetos dinamicos
-# [] Refazer as fases (com oq eu tiver conseguido implementar acima)
-
 ###########################
 #  Executa o menu inicial #
 ###########################

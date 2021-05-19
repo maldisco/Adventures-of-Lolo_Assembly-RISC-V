@@ -19,8 +19,10 @@ SHOT_INITIAL_POSX:	.word 0
 SHOT_POSY:		.word 0
 SHOT_SPEED:		.word 0 
 SHOT_FINAL_BLOCK:	.word 0
-SHOOTING_ENEMY:		.word 0		# 0 = not shooting, 1 = shooting
+SHOOTING_ENEMY:		.word 1		# 0 = not shooting, 1 = shooting
 
+NUMBER_OF_ENEMIES:	.word 0
+TOGGLE_RNG:		.word 0
 .text
 ENEMY_WALK:
 #	render_sprite(tijolo,CURRENT_ENEMY_POSX,CURRENT_ENEMY_POSY)
@@ -74,10 +76,10 @@ ENEMIES_WALK:
 	la s5,ENEMY_SPEED
 	la s6,ENEMY_INITIAL_BLOCK
 	la s7,ENEMY_FINAL_BLOCK
-	li t5,0
-	li t6,6
+	li s8,0
+	loadw(s9,NUMBER_OF_ENEMIES)
 	EWS_LOOP:
-	beq t5,t6,EWS_DONE	# inicio loop
+	beq s8,s9,EWS_DONE	# inicio loop
 		lw t3,(s3)
 		savew(t3,CURRENT_ENEMY_POSX)	
 		lw t3,(s4)
@@ -99,17 +101,28 @@ ENEMIES_WALK:
 		loadw(a3,CURRENT_ENEMY_SPEED)
 		add a1,a1,a3
 		calculate_block(a1,a2)
-		li a7,42
-		ecall			# a0 = numero aleatorio
-		li t4,13
-		rem t4,a0,t4		# t4 = resto entre a0 e 13
-		bnez t4,EWS_RNG	
-			li t4,-1
-			mul a3,a3,t4	# Se o resto for igual a 0, o inimigo começa a ir para a direção oposta
-			savew(a3,CURRENT_ENEMY_SPEED)
-			sw a3,(s5)
+		loadw(t2,TOGGLE_RNG)
+		beqz t2, EWS_RNG
+			li a7,41
+			ecall			# a0 = numero aleatorio
+			li t4,13
+			rem t4,a0,t4		# t4 = resto entre a0 e 13
+			bnez t4,EWS_RNG	
+				li t4,-1
+				mul a3,a3,t4	# Se o resto for igual a 0, o inimigo começa a ir para a direção oposta
+				savew(a3,CURRENT_ENEMY_SPEED)
+				sw a3,(s5)
 		EWS_RNG:
- 		# 
+ 		#	
+ 		la t2,PUSHABLE_BLOCKS
+ 		add t2,t2,t1
+ 		lb t2,(t2)
+ 		beqz t2,EWS_JUMP
+ 			loadw(a1,CURRENT_ENEMY_SPEED)
+ 			sub a1,zero,a1
+ 			savew(a1,CURRENT_ENEMY_SPEED)
+ 			sw a1,(s5)
+ 		EWS_JUMP:
 		loadw(t2,CURRENT_ENEMY_F_BLOCK)
 		bne t1,t2,EWS_KEEP
 			li t2,-16
@@ -146,7 +159,7 @@ ENEMIES_WALK:
 		addi s5,s5,4
 		addi s6,s6,4
 		addi s7,s7,4
-		addi t5,t5,1
+		addi s8,s8,1
 		j EWS_LOOP
 	EWS_DONE:
 	j POLL_LOOP
@@ -155,17 +168,21 @@ ENEMIES_WALK:
 # Renderiza um tiro que vai da posição (x,y) até o bloco final #
 ################################################################
 ENEMY_SHOT:
-	render_abs_sprite(tijolo,SHOT_POSX,SHOT_POSY)
-	loadw(s1,SHOT_POSX)
-	loadw(s2,SHOT_POSY)
-	loadw(s3,SHOT_SPEED)
-	loadw(s4,SHOT_FINAL_BLOCK)
-	add s1,s1,s3
-	calculate_block(s1,s2)
-	ble t1,s4,ES_CONTINUE
-		loadw(s1,SHOT_INITIAL_POSX)
+	loadw(t1,SHOOTING_ENEMY)
+	beqz t1,ES_DONT
+		render_abs_sprite(tijolo,SHOT_POSX,SHOT_POSY)
+		loadw(s1,SHOT_POSX)
+		loadw(s2,SHOT_POSY)
+		loadw(s3,SHOT_SPEED)
+		loadw(s4,SHOT_FINAL_BLOCK)
+		add s1,s1,s3
+		calculate_block(s1,s2)
+		ble t1,s4,ES_CONTINUE
+			loadw(s1,SHOT_INITIAL_POSX)
+			savew(s1,SHOT_POSX)
+		ES_CONTINUE:
 		savew(s1,SHOT_POSX)
-	ES_CONTINUE:
-	savew(s1,SHOT_POSX)
-	render_abs_sprite(enemy_shot,SHOT_POSX,SHOT_POSY)
+		call COLISION_TEST
+		render_abs_sprite(enemy_shot,SHOT_POSX,SHOT_POSY)
+	ES_DONT:
 	j POLL_LOOP

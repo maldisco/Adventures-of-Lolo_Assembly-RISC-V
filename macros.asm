@@ -47,8 +47,6 @@ PUSHABLE_BLOCKS:	.space 121		# vetor de 121 elementos, 0 = false, 1 = true
 CURRENT_LEVEL:		.word 1
 CLOCK:			.word 0
 CLOCK_2:		.word 0
-SCORE_POSX:		.word 266
-SCORE_POSY:		.word 52
 ########################################
 # Imprime a porta (coordenadas padrão) #
 ########################################
@@ -81,11 +79,27 @@ jal PS_LOOP
 ######################################################################
 # Marca N blocos a partir da coordenada X,Y como blocos não andáveis #
 ######################################################################
-.macro mark_as_block(%n, %x, %y)
+.macro mark_as_block(%n,%sentido, %x, %y)
 li a0, %n
 li a2, %x
 li a3, %y
-jal MARK_AS_BLOCK
+calculate_block(a2,a3)		# Bloco (x,y) = T1
+la a3,WALKABLE_BLOCKS
+add a3,a3,t1
+call %sentido
+.end_macro
+############################################################
+# Marca o bloco nas coordenadas x,y como bloco não andável #
+############################################################
+.macro mark_as_block(%x, %y)
+li t3, %y
+li t2, %x
+calculate_block(t2,t3)
+# t1 = block
+la t0, WALKABLE_BLOCKS
+add t0,t0,t1
+li t1,1
+sb t1,(t0)
 .end_macro
 ##########################################################################
 # Imprime uma sprite 16x16 a partir de um endereço encontrado na memória #
@@ -161,6 +175,17 @@ add t0,t0,t1
 li t1,1
 sb t1,(t0)
 .end_macro
+##############################################
+# Marca o bloco nas coordenadas x,y como baú #
+##############################################
+.macro mark_as_chest(%x, %y)
+li t3, %y
+li t2, %x
+savew(t2,CHEST_POSX)
+savew(t3,CHEST_POSY)
+mark_as_key(%x,%y)
+mark_as_block(%x,%y)
+.end_macro
 #################################################
 # Marca o bloco nas coordenadas x,y como mortal #
 #################################################
@@ -173,6 +198,19 @@ la t0, MORTAL_BLOCKS
 add t0,t0,t1
 li t1,1
 sb t1,(t0)
+.end_macro
+###################################################
+# Marca N blocos nas coordenadas x,y como mortais #
+# especificando horizontal ou vertical		  #
+###################################################
+.macro mark_as_mortal(%n,%direction,%x,%y)
+li a0, %n
+li a2, %x
+li a3, %y
+calculate_block(a2,a3)		# Bloco (x,y) = T1
+la a3,MORTAL_BLOCKS
+add a3,a3,t1
+call %direction
 .end_macro
 #################################################
 # Marca o bloco nas coordenadas x,y como ponte  #
@@ -417,6 +455,7 @@ sw %reg,(t0)
 ####################################################
 .macro reset()
 reset_blocks()
+call RESET_ENEMIES
 li t1,1
 savew(t1,DOOR_STATE)
 li t1,74
@@ -479,6 +518,8 @@ ecall
 .include "./sprites/blocos/score_one.data"
 .include "./sprites/blocos/score_two.data"
 .include "./sprites/blocos/score_three.data"
+.include "./sprites/blocos/chest.data"
+.include "./sprites/blocos/open_chest.data"
 .include "./sprites/porta/porta.data"
 .include "./sprites/porta/porta_fechada.data"
 .include "./sprites/bg/start_menu_1.data"

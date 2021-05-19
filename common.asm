@@ -89,6 +89,7 @@ RESET_BLOCKS:
 	la t1,WALKABLE_BLOCKS
 	la t5,BRIDGE_BLOCKS
 	la t6,MORTAL_BLOCKS
+	la a1,PUSHABLE_BLOCKS
 	li t2,121
 	li t3,0
 	RB_LOOP:
@@ -98,7 +99,9 @@ RESET_BLOCKS:
 		sb t4,(t1)
 		sb t4,(t5)
 		sb t4,(t6)
+		sb t4,(a1)
 		addi t0,t0,1
+		addi a1,a1,1
 		addi t1,t1,1
 		addi t5,t5,1
 		addi t6,t6,1
@@ -122,7 +125,23 @@ DOOR_TEST:
 ##########################################
 KEY_TEST:
 	beqz t1, KT_OPEN_DOOR
-		ret
+		li t2,1
+		beq t1,t2,CHEST_OPEN
+			ret
+		CHEST_OPEN:
+			mv s8,ra
+			li t1,1
+			savew(t1,SHOOTING_ENEMY)
+			render_abs_sprite(open_chest,CHEST_POSX,CHEST_POSY)
+			loadw(t1,CHEST_POSX)
+			loadw(t2,CHEST_POSY)
+			calculate_block(t1,t2)
+			la t2,WALKABLE_BLOCKS
+			add t2,t2,t1
+			li t1,0
+			sb t1,(t2)
+			mv ra,s8
+			ret
 	KT_OPEN_DOOR:
 	savew(t1,DOOR_STATE)
 	ret
@@ -135,27 +154,45 @@ COLISION_TEST:
 	loadw(t2,LOLO_POSY)
 	loadw(t3,CURRENT_ENEMY_POSX)
 	loadw(t4,CURRENT_ENEMY_POSY)
+	loadw(t5,SHOT_POSX)
+	loadw(t6,SHOT_POSY)
 	beq t1,t3,CT_1		
-		ret		# Se o X não coincide, não houve colisão
+		beq t1,t5,CT_2
+			ret		# Se o X não coincide, não houve colisão
+		CT_2:
+		beq t2,t6,CT_HIT
+			ret
 	CT_1:
 	beq t2,t4,CT_HIT	
 		ret		# Se o Y não coincide, não houve colisão
 	CT_HIT:
+	mv s7,ra
 	loadw(t1,LIFE_COUNTER)	# Ambos coincidem, houve colisão
 	addi t1,t1,-1
 	bnez t1,CT_ALIVE	# Se a vida após colisão for 0, morte
 		you_died()
 	CT_ALIVE:		# Se não, reinicia a posição de lolo no mapa
 	savew(t1,LIFE_COUNTER)
-	li t1,74
-	li t2,36
+	loadw(t1,LOLO_INITIAL_POSX)
+	loadw(t2,LOLO_INITIAL_POSY)
 	savew(t1,LOLO_POSX)
 	savew(t2,LOLO_POSY)
 	render_sprite(lolo_coca,LOLO_POSX,LOLO_POSY)
 	call SCORE_REFRESH
 	sound(HIT)
-	j CT_RETURN
-	
+	mv ra,s7
+	ret
+
+###############################################
+# Reseta as posições dos inimigos entre fases #
+###############################################
+RESET_ENEMIES:
+	li t1,0
+	savew(t1,SHOT_POSX)
+	savew(t1,SHOT_POSY)
+	savew(t1,CURRENT_ENEMY_POSX)
+	savew(t1,CURRENT_ENEMY_POSY)
+	ret
 	
 #####################
 # Atualiza o placar #

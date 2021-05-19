@@ -22,7 +22,7 @@ LOLO_WALK_UP:
 	addi a1,a1,-16
 	jal IS_DOOR				# Testa se o destino é uma porta
 	li t2, MAP_UPPER_EDGE	
-	blt a1,t2,LWU_INVALID			# Testa se Lolo saiu do mapa ( Y maior que borda superior do mapa)
+	blt a1,t2,LWU_INVALID_2			# Testa se Lolo saiu do mapa ( Y maior que borda superior do mapa)
 		loadw(t3,LOLO_POSX)
 		calculate_block(t3,a1)
 		jal IS_MORTAL_BLOCK		# Testa se o bloco destino é um bloco mortal
@@ -32,6 +32,7 @@ LOLO_WALK_UP:
 		bgtz t3, LWU_INVALID 		# Testa se é um bloco andável
 			savew(a1,LOLO_POSY)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
+			j LWU_INVALID_2
 	LWU_INVALID:
 	jal IS_PUSHABLE_BLOCK
 	beqz t3,LWU_INVALID_2
@@ -47,7 +48,7 @@ LOLO_WALK_DOWN:
 	loadw(a1,LOLO_POSY)
 	addi a1,a1,16
 	li t2, MAP_LOWER_EDGE
-	bgt a1,t2,LWD_INVALID 			# Teste está no mapa
+	bgt a1,t2,LWD_INVALID_2 			# Teste está no mapa
 		loadw(t3,LOLO_POSX)
 		calculate_block(t3,a1)
 		jal IS_MORTAL_BLOCK		# Testa se é um bloco mortal
@@ -58,6 +59,7 @@ LOLO_WALK_DOWN:
 		bgtz t3,LWD_INVALID
 			savew(a1,LOLO_POSY)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
+			j LWD_INVALID_2
 	LWD_INVALID:
 	jal IS_PUSHABLE_BLOCK
 	beqz t3,LWD_INVALID_2
@@ -73,7 +75,7 @@ LOLO_WALK_RIGHT:
 	loadw( a1,LOLO_POSX )
 	addi a1,a1,16
 	li t2, MAP_RIGHT_EDGE
-	bgt a1,t2,LWR_INVALID			# Testa se está no mapa
+	bgt a1,t2,LWR_INVALID_2			# Testa se está no mapa
 		loadw( t3,LOLO_POSY )
 		calculate_block( a1,t3 )
 		jal IS_MORTAL_BLOCK		# Testa se é um bloco mortal
@@ -84,6 +86,7 @@ LOLO_WALK_RIGHT:
 		bgtz t3,LWR_INVALID		# Testa se é um bloco andável
 			savew(a1,LOLO_POSX)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
+			j LWR_INVALID_2
 	LWR_INVALID:
 	jal IS_PUSHABLE_BLOCK
 	beqz t3,LWR_INVALID_2
@@ -99,7 +102,7 @@ LOLO_WALK_LEFT:
 	loadw(a1,LOLO_POSX)
 	addi a1,a1,-16
 	li t2, MAP_LEFT_EDGE
-	blt a1,t2, LWL_INVALID			# Testa se está no mapa
+	blt a1,t2, LWL_INVALID_2			# Testa se está no mapa
 		loadw( t3,LOLO_POSY )
 		calculate_block(a1,t3)
 		jal IS_MORTAL_BLOCK		# Testa se é um bloco mortal
@@ -110,6 +113,7 @@ LOLO_WALK_LEFT:
 		bgtz t3,LWL_INVALID		# Testa se é um bloco andável
 			savew(a1,LOLO_POSX)	# Atualiza a posição de Lolo para a próxima renderização
 			jal IS_KEY_BLOCK
+			j LWL_INVALID_2
 	LWL_INVALID:
 	jal IS_PUSHABLE_BLOCK
 	beqz t3,LWL_INVALID_2
@@ -132,8 +136,8 @@ IS_MORTAL_BLOCK:
 		addi t3,t3,-1
 		beqz t3, DEAD
 			savew(t3,LIFE_COUNTER)
-			li t1,74
-			li t2,36
+			loadw(t1,LOLO_INITIAL_POSX)
+			loadw(t2,LOLO_INITIAL_POSY)
 			savew(t1,LOLO_POSX)
 			savew(t2,LOLO_POSY)
 			render_sprite(lolo_pisca,LOLO_POSX,LOLO_POSY)
@@ -174,7 +178,7 @@ IS_PUSHABLE_BLOCK:
 	la t2, PUSHABLE_BLOCKS
 	add t2,t2,t1
 	lb t3,(t2)
-	beqz t3, IPB_INVALID	# Testa se o bloco está marcado como KEY no vetor KEY_BLOCKS
+	beqz t3, IPB_INVALID	# Testa se o bloco está marcado como empurrável no vetor PUSHABLE_BLOCKS
 		li t3,1
 		ret	
 	IPB_INVALID:
@@ -188,12 +192,14 @@ IS_PUSHABLE_BLOCK:
 	# a1 vem com a posição Y do lolo atualizada (depois de andar)
 	loadw(a2,LOLO_POSX)
 	addi a3,a1,-16			# Calcula mais um passo pra cima
+	li t2,MAP_UPPER_EDGE
+	blt a3,t2,PU_INVALID
 	calculate_block(a2,a3)		# simulando um passo do bloco empurrável
 	la t2,WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	beqz t1, PU_VALID		# Se o passo do bloco empurrável entrar em uma parede
-					# ou em outro bloco marcado como não andável
+		PU_INVALID:		# ou em outro bloco marcado como não andável
 		calculate_block(a2,a1)	# Retorna ao loop 'lolo_walk' marcando o bloco empurrável
 		la t2,WALKABLE_BLOCKS	# como um bloco não andável
 		add t2,t2,t1
@@ -234,11 +240,14 @@ IS_PUSHABLE_BLOCK:
 	PUSHABLE_DOWN:
 	loadw(a2,LOLO_POSX)
 	addi a3,a1,16
+	li t2,MAP_LOWER_EDGE
+	bgt a3,t2,PD_INVALID
 	calculate_block(a2,a3)
 	la t2,WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	beqz t1, PD_VALID
+		PD_INVALID:
 		calculate_block(a2,a1)
 		la t2,WALKABLE_BLOCKS
 		add t2,t2,t1
@@ -279,11 +288,14 @@ IS_PUSHABLE_BLOCK:
 	PUSHABLE_RIGHT:
 	loadw(a2,LOLO_POSY)
 	addi a3,a1,16
+	li t2,MAP_RIGHT_EDGE
+	bgt a3,t2,PR_INVALID
 	calculate_block(a3,a2)
 	la t2,WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	beqz t1, PR_VALID
+		PR_INVALID:
 		calculate_block(a1,a2)
 		la t2,WALKABLE_BLOCKS
 		add t2,t2,t1
@@ -324,11 +336,14 @@ IS_PUSHABLE_BLOCK:
 	PUSHABLE_LEFT:
 	loadw(a2,LOLO_POSY)
 	addi a3,a1,-16
+	li t2,MAP_LEFT_EDGE
+	blt a3,t2,PL_INVALID
 	calculate_block(a3,a2)
 	la t2,WALKABLE_BLOCKS
 	add t2,t2,t1
 	lb t1,(t2)
 	beqz t1, PL_VALID
+		PL_INVALID:
 		calculate_block(a1,a2)
 		la t2,WALKABLE_BLOCKS
 		add t2,t2,t1
