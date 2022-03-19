@@ -1,6 +1,8 @@
-# Projeto ISC
-Repositório para o projeto: Adventures of Lolo em assembly RISC-V
+# Adventures of lolo
+Adeventures of Lolo é um jogo desenvolvido para NES (Nintendo Entertainment System).
+Neste repositório encontra-se uma releitura do jogo em Assembly RISC-V feita como projeto final.
+Disciplina: Introdução a Sistemas Computacionais (Marcus Vinícius Lamar)
 
-Como jogar com o fpgrars:
+Como jogar:
   - Extraia para uma pasta qualquer
-  - Arraste o arquivo 'main' para o arquivo 'fpgrars'
+  - Arraste o arquivo 'main.asm' para o arquivo 'fpgrars'
