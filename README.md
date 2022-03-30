@@ -9,6 +9,18 @@ Como jogar:
   - Extraia para uma pasta qualquer
   - Arraste o arquivo 'main.asm' para o arquivo 'fpgrars'
 
+Comandos:
+  - Menu:
+      - 'W' -> Subir
+      - 'S' -> Descer
+      - 'E' -> Selecionar
+  - Em jogo:
+      - 'W' -> Cima
+      - 'A' -> Esquerda
+      - 'S' -> Baixo
+      - 'D' -> Direita
+      
+
 # Screenshots
 
 ![Menu inicial](https://github.com/maldisco/Adventures-of-Lolo_Assembly-RISC-V/blob/main/screenshots/menu.png)
